@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -8,7 +9,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./components/Dashboard";
 import Header from "./pages/Header";
 import HeroSection from "./pages/HeroSection";
 import Banner from "./pages/Banner";
