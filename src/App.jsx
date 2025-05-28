@@ -1,4 +1,5 @@
 
+
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -10,9 +11,9 @@ import {
 } from "react-router-dom";
 import Layout from "./components/Layout";
 import Dashboard from "./components/Dashboard";
-import Header from "./pages/Header";
-import HeroSection from "./pages/HeroSection";
-import Banner from "./pages/Banner";
+import Header from "./components/Header/Header";
+import Hero_Section from "./components/Hero_Section/Hero_Section";
+import Slider from "./components/Slider/Slider";
 import AboutUsForm from "./pages/AboutUsForm";
 import Products from "./pages/Products";
 import Blogs from "./pages/Blogs";
@@ -75,7 +76,7 @@ const App = () => {
             path="hero-section"
             element={
               <ProtectedRoute>
-                <HeroSection />
+                <Hero_Section />
               </ProtectedRoute>
             }
           />
@@ -83,7 +84,7 @@ const App = () => {
             path="banner"
             element={
               <ProtectedRoute>
-                <Banner />
+                <Slider />
               </ProtectedRoute>
             }
           />
