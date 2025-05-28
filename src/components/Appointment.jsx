@@ -4,12 +4,7 @@ import { Upload, Plus, Edit2, Trash2, FileText, X } from "lucide-react";
 
 const Appointment = () => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [titleItems, setTitleItems] = useState([
-    "Laser Skin Discover a sanctuary of beauty and relaxation",
-  ]);
-  const [descriptionItems, setDescriptionItems] = useState([
-    "Laser Skin Discover a sanctuary of beauty and relaxation",
-  ]);
+  const [imgPreview, setImagePreview] = useState("");
 
   const {
     register,
@@ -44,10 +39,12 @@ const Appointment = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const removeFile = () => {
     setSelectedFile(null);
+    setImagePreview("");
     document.getElementById("fileInput").value = "";
   };
 
@@ -56,56 +53,48 @@ const Appointment = () => {
       <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-200 shadow-sm">
         <div className="space-y-6">
           {/* File Upload Section */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Choose File
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                id="fileInput"
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*,.pdf,.doc,.docx"
-              />
-              <label
-                htmlFor="fileInput"
-                className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200 group"
-              >
-                <div className="text-center">
-                  <Upload className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
-                  <div className="mt-4">
-                    <p className="text-base sm:text-lg font-medium text-gray-700 group-hover:text-blue-600">
-                      Click to upload file
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                      PNG, JPG, PDF up to 10MB
-                    </p>
-                  </div>
-                </div>
-              </label>
 
-              {selectedFile && (
-                <div className="mt-3 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center space-x-2 min-w-0 flex-1">
-                    <FileText className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-green-800 truncate">
-                      {selectedFile.name}
-                    </span>
-                    <span className="text-xs text-green-600 flex-shrink-0">
-                      ({(selectedFile.size / 1024).toFixed(1)} KB)
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeFile}
-                    className="p-1 hover:bg-green-100 rounded-full transition-colors duration-200 flex-shrink-0 ml-2"
-                  >
-                    <X className="h-4 w-4 text-green-600" />
-                  </button>
+          <div className="w-full flex flex-wrap md:flex-row gap-2 items-center justify-between relative">
+            <input
+              type="file"
+              id="fileInput"
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx"
+            />
+            <label
+              htmlFor="fileInput"
+              className="flex-1 min-w-40 flex items-center justify-center  px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200 group"
+            >
+              <div className="text-center">
+                <Upload className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
+                <div className="mt-4">
+                  <p className="text-base sm:text-lg font-medium text-gray-700 group-hover:text-blue-600">
+                    Click to upload file
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    PNG, JPG, PDF up to 10MB
+                  </p>
                 </div>
-              )}
-            </div>
+              </div>
+            </label>
+
+            {imgPreview && (
+              <div className="relative flex items-center justify-between p-3 rounded-md border border-gray-200 shadow-md">
+                <img
+                  src={imgPreview}
+                  alt="Preview"
+                  className="object-cover max-h-36 rounded-sm"
+                />
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full transition-colors duration-200 flex-shrink-0 ml-2"
+                >
+                  <X className="h-6 w-6 text-red-100 hover:text-white" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Title Section */}
