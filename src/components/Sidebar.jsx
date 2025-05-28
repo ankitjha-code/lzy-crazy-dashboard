@@ -50,7 +50,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 py-4">
+      <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-3">
           {menuItems.map((item, index) => {
             const Icon = item.icon;

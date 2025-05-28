@@ -12,7 +12,7 @@ const Header = () => {
   };
 
   return (
-    <div className="min-h-150 w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5">
+    <div className="min-h-screen w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5">
       <div className="w-full md:w-[50%] space-y-5">
         {/* File Input */}
         {image && (
