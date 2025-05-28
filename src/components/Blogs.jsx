@@ -3,6 +3,14 @@ import { Plus } from "lucide-react";
 
 const Blogs = () => {
   const [productName, setProductName] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(URL.createObjectURL(file));
+    }
+  };
 
   const handleAdd = () => {
     console.log("Product Name Added:", productName);
@@ -19,8 +27,16 @@ const Blogs = () => {
       <div className="mb-6">
         <input
           type="file"
+          onChange={handleImageChange}
           className="block w-60 border border-gray-300 rounded px-4 py-2 text-sm"
         />
+        {selectedImage && (
+          <img
+            src={selectedImage}
+            alt="Preview"
+            className="mt-4 w-60 h-auto rounded border border-gray-300"
+          />
+        )}
       </div>
 
       {/* Product Name Input */}

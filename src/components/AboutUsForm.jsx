@@ -3,6 +3,14 @@ import { Plus } from "lucide-react";
 
 const AboutUsForm = () => {
   const [aboutText, setAboutText] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(URL.createObjectURL(file));
+    }
+  };
 
   const handleAdd = () => {
     console.log("About Us Added:", aboutText);
@@ -19,8 +27,16 @@ const AboutUsForm = () => {
       <div className="mb-6">
         <input
           type="file"
+          onChange={handleImageChange}
           className="block w-60 border border-gray-300 rounded px-4 py-3 text-base"
         />
+        {selectedImage && (
+          <img
+            src={selectedImage}
+            alt="Preview"
+            className="mt-4 w-60 h-auto rounded border border-gray-300"
+          />
+        )}
       </div>
 
       {/* About Us Input */}
