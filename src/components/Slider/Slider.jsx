@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { PlusCircle } from "lucide-react";
+
+import { Edit, PlusCircle, Trash2 } from "lucide-react";
 
 const Slider = () => {
   const [image, setImage] = useState("");
@@ -10,6 +11,20 @@ const Slider = () => {
       setImage(URL.createObjectURL(file));
     }
   };
+
+  const data = [
+    {
+      photo:
+        "https://imgs.search.brave.com/p6-mxnlb38zbNnmfGawlb7rQJTQ1rlX4TKAnHUPXb4o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vQTlwOTI0/MWNLTHN0bkVURXMx/SE1FUGxPTmxqeF8y/SkhEMlFCTDJOcERa/WS9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVwYzNS/dlkydHdhRzkwL2J5/NWpiMjB2YVdRdk1U/TXgvTURVek9UQXdP/Qzl3YUc5MC9ieTl6/YUc5MExXOW1MV0V0/L2VXOTFibWN0ZDI5/dFpXNHQvZFhOcGJt/Y3RiVzlpYVd4bC9M/WEJvYjI1bExYTnZZ/MmxoL2JDMXRaV1Jw/WVMxemRYSm0vYVc1/bkxYUm9aUzF1WlhR/dC9jM1JoYm1ScGJt/Y3RhWE52L2JHRjBa/V1F0YjNabGNpNXEv/Y0djX2N6MDJNVEo0/TmpFeS9KbmM5TUNa/clBUSXdKbU05L2RF/ZGlXVWREYzFKMU1u/VTIvUTNFMVJsSjZX/blp1WVROWC9kR1I2/VjNWUk1uUTFheTFV/L2FscE9aRXRLZHow",
+      slider: " I am good",
+    },
+    {
+      photo:
+        "https://imgs.search.brave.com/sqe0EUYwqOVBb-qwdJ5CcIEjNCjVU5QSSyU7sctM7ws/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vVHdOR2Zr/Wkd0aFVaMW82X1Rr/UTdlZ2MyOGVjUFNl/OUFReUZnZHowbllB/NC9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVuWlhS/MGVXbHRZV2RsL2N5/NWpiMjB2YVdRdk1U/WTMvTlRnNE1ERTFO/Qzl3YUc5MC9ieTlq/YUdWbGNtWjFiQzFt/L2NtbGxibVJ6TFdw/MWJYQnAvYm1jdGFH/bG5hQzExY0MxcC9i/aTF0YVdRdFlXbHlM/bXB3L1p6OXpQVFl4/TW5nMk1USW0vZHow/d0ptczlNakFtWXox/eC9lbDlhTURsSlVt/VjVlRUZQL2FtMXRa/bmRaWldOc2NHUm8v/VkdNNGVHcHZWbFpU/TFdOQi9kbWR3TkZW/elBR",
+      slider: "How are you",
+    },
+  ];
+
   return (
     <div>
       {" "}
@@ -66,6 +81,48 @@ const Slider = () => {
             </button>
           </div>
         </form>
+        <div className="overflow-x-auto mt-5 px-4">
+          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+            <thead className="bg-gray-100 text-gray-800">
+              <tr>
+                <th className="py-2 px-4 text-left">Image</th>
+                <th className="py-2 px-4 text-left">Slider</th>
+
+                <th className="py-2 px-4 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, i) => (
+                <tr key={i} className="border-t border-gray-200">
+                  <td className="py-2 px-4">
+                    <img
+                      src={item.photo}
+                      alt={item.title}
+                      className="w-12 h-12 object-cover rounded-lg"
+                    />
+                  </td>
+                  <td className="py-2 px-4">{item.slider}</td>
+
+                  <td className="py-2 px-4">
+                    <div className="flex flex-row items-center gap-3">
+                      <div>
+                        <button className="text-blue-600 flex flex-col items-center hover:underline cursor-pointer">
+                          <Edit size={18} />
+                        </button>
+                      </div>
+                      |
+                      <div>
+                        <button className="text-red-600 flex flex-col items-center hover:underline cursor-pointer">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
