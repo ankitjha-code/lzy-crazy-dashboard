@@ -1,5 +1,6 @@
 import React from "react";
 import Dashboard from "./components/Dashboard";
+import Appointment from "./components/Appointment";
 
 const App = () => {
   return (
@@ -9,6 +10,7 @@ const App = () => {
         This is a simple React app styled with Tailwind CSS.
       </p>
       <Dashboard />
+      <Appointment />
     </div>
   );
 };

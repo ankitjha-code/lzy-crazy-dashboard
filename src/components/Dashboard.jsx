@@ -90,7 +90,7 @@ const COLORS = ["#10B981", "#F59E0B", "#EF4444", "#3B82F6"];
 const Dashboard = () => {
   // Data structure for future API integration
   return (
-    <div className=" w-full card-container max-w-[1550px] mx-auto min-h-screen bg-white rounded-xl border border-gray-200 shadow-md mb-8 p-6">
+    <div className=" w-full card-container max-w-[1550px] mx-auto min-h-screen bg-white rounded-xl border border-gray-200 shadow-md mb-8 px-1 py-6 md:p-6">
       {/* Dashboard Title */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Dashboard</h2>
@@ -154,7 +154,7 @@ const Dashboard = () => {
 
         {/* Revenue Chart */}
         <div className="bg-white lg:col-span-7  rounded-lg shadow-md border-gray-200 border pb-6">
-          <div className="flex items-center justify-between mb-6 border-b-2 border-gray-200 p-4">
+          <div className="flex items-center justify-between flex-wrap mb-6 border-b-2 border-gray-200 p-4">
             <h3 className="text-lg font-semibold text-gray-800">Revenue</h3>
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="px-6">
+          <div className="w-full px-6">
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={dashboardData.revenue.monthly}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
