@@ -8,7 +8,7 @@ const Layout = () => {
   const isAuthPage = location.pathname === "/auth";
 
   return (
-    <div className="flex h-full bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       {!isAuthPage && <Sidebar />}
       <div
         className={`flex flex-col ${

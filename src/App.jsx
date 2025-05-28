@@ -1,5 +1,3 @@
-
-
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -9,6 +7,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import Dashboard from "./components/Dashboard";
 import Layout from "./components/Layout";
 import Header from "./components/Header/Header";
 import Hero_Section from "./components/Hero_Section/Hero_Section";

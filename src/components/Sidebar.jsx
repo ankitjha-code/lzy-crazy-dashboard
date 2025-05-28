@@ -96,26 +96,6 @@ export function Sidebar() {
           </nav>
         </div>
       </div>
-
-      {/* Upgrade to PRO Card */}
-      <div className="p-4">
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-4 text-white relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3">
-              <Crown className="w-6 h-6" />
-            </div>
-            <h3 className="font-semibold text-lg mb-1">Upgrade to PRO</h3>
-            <p className="text-sm text-white/90 mb-3 leading-relaxed">
-              to get access to all features!
-              <br />
-              Connect with Venus World!
-            </p>
-          </div>
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-8 -translate-x-8"></div>
-        </div>
-      </div>
     </div>
   );
 }
