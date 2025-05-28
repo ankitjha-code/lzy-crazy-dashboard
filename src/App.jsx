@@ -1,4 +1,5 @@
 import React from "react";
+import Dashboard from "./components/Dashboard";
 
 const App = () => {
   return (
@@ -7,6 +8,7 @@ const App = () => {
       <p className="mt-4 text-lg">
         This is a simple React app styled with Tailwind CSS.
       </p>
+      <Dashboard />
     </div>
   );
 };
