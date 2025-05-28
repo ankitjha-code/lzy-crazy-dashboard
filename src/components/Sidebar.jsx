@@ -37,7 +37,7 @@ export function Sidebar() {
 
   const profileItems = [
     { icon: User, label: "Profile", path: "/profile" },
-    { icon: LogIn, label: "Sign In", path: "/signin" },
+    { icon: LogIn, label: "Logout", path: "/auth" },
   ];
 
   return (
