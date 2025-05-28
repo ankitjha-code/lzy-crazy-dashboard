@@ -1,4 +1,4 @@
-import React from "react";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -8,6 +8,7 @@ import Blogs from "./components/Blogs";
 import AboutUsForm from "./components/AboutUsForm";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import Footer from './components/Footer';
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
         <Products></Products>
         <Blogs></Blogs>
         <AboutUsForm></AboutUsForm>
+         <Footer/>
         </div>
       </div>
     </Router>
