@@ -1,4 +1,7 @@
 import React from "react";
+import Products from "./components/Products";
+import Blogs from "./components/Blogs";
+import AboutUsForm from "./components/AboutUsForm";
 
 const App = () => {
   return (
@@ -6,6 +9,9 @@ const App = () => {
       <h1 className="text-4xl font-bold">Welcome to My App</h1>
       <p className="mt-4 text-lg">
         This is a simple React app styled with Tailwind CSS.
+        <Products></Products>
+        <Blogs></Blogs>
+        <AboutUsForm></AboutUsForm>
       </p>
     </div>
   );
