@@ -172,13 +172,14 @@ const Products = () => {
                         onClick={() => handleEdit(index)}
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >
-                        <Pencil size={16} /> Edit
+                        <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(index)}
                         className="text-red-600 hover:underline flex items-center gap-1"
                       >
-                        <Trash2 size={16} /> Delete
+                        <span>|</span>
+                        <Trash2 size={16} />
                       </button>
                     </td>
                   </tr>
