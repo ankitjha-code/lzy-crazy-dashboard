@@ -11,9 +11,6 @@ import {
   Users,
   Calendar,
   FootprintsIcon as Footer,
-  User,
-  LogIn,
-  Crown,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -33,11 +30,6 @@ export function Sidebar() {
     { icon: Users, label: "Clients", path: "/clients" },
     { icon: Calendar, label: "Appointment", path: "/appointment" },
     { icon: Footer, label: "Footer", path: "/footer" },
-  ];
-
-  const profileItems = [
-    { icon: User, label: "Profile", path: "/profile" },
-    { icon: LogIn, label: "Logout", path: "/auth" },
   ];
 
   return (
@@ -71,30 +63,6 @@ export function Sidebar() {
             );
           })}
         </nav>
-
-        {/* Profile Section */}
-        <div className="mt-8 px-3">
-          <nav className="space-y-1">
-            {profileItems.map((item, index) => {
-              const Icon = item.icon;
-              const isActive = currentPath === item.path;
-              return (
-                <Link
-                  key={index}
-                  to={item.path}
-                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
       </div>
     </div>
   );

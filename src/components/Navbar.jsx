@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
+  const profileDropdownRef = useRef(null);
 
   // Map paths to page names
   const getPageName = (path) => {
@@ -19,6 +21,23 @@ const Navbar = () => {
   };
 
   const pageName = getPageName(location.pathname);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Prevent scrolling when mobile menu is open
   useEffect(() => {
@@ -158,7 +177,10 @@ const Navbar = () => {
               </button>
             </li>
             <li>
-              <button className="flex items-center p-2 w-full text-left rounded-lg hover:bg-gray-100 text-gray-700">
+              <Link
+                to="/profile"
+                className="flex items-center p-2 w-full text-left rounded-lg hover:bg-gray-100 text-gray-700"
+              >
                 <div className="w-5 h-5 mr-3 rounded-full overflow-hidden flex-shrink-0">
                   <img
                     src="https://randomuser.me/api/portraits/men/32.jpg"
@@ -167,7 +189,29 @@ const Navbar = () => {
                   />
                 </div>
                 <span>Profile</span>
-              </button>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/auth"
+                className="flex items-center p-2 w-full text-left rounded-lg hover:bg-gray-100 text-gray-700"
+              >
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  ></path>
+                </svg>
+                <span>Logout</span>
+              </Link>
             </li>
           </ul>
         </div>
@@ -292,13 +336,68 @@ const Navbar = () => {
                 </svg>
               </button>
 
-              {/* Profile Avatar */}
-              <div className="w-8 h-8 rounded-full overflow-hidden ml-1">
-                <img
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
+              {/* Profile Avatar with Dropdown */}
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  className="w-8 h-8 rounded-full overflow-hidden ml-1 focus:outline-none"
+                  onClick={() =>
+                    setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                  }
+                >
+                  <img
+                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+
+                {/* Profile Dropdown */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-4 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <Link
+                      to="/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <svg
+                        className="w-5 h-5 mr-3 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        ></path>
+                      </svg>
+                      Profile
+                    </Link>
+                    <Link
+                      to="/auth"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <svg
+                        className="w-5 h-5 mr-3 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        ></path>
+                      </svg>
+                      Logout
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
