@@ -1,13 +1,18 @@
 import React from "react";
+import Header from "./components/Header/Header";
+import { Route, Routes } from "react-router-dom";
+import Hero_Section from "./components/Hero_Section/Hero_Section";
+import Slider from "./components/Slider/Slider";
 
 const App = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold">Welcome to My App</h1>
-      <p className="mt-4 text-lg">
-        This is a simple React app styled with Tailwind CSS.
-      </p>
-    </div>
+    <>
+      <Routes>
+        <Route path="/header" element={<Header />} />
+        <Route path="/hero-section" element={<Hero_Section />} />
+        <Route path="/slider" element={<Slider />} />
+      </Routes>
+    </>
   );
 };
 
