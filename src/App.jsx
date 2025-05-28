@@ -10,7 +10,6 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Layout from "./components/Layout";
-import Dashboard from "./components/Dashboard";
 import Header from "./components/Header/Header";
 import Hero_Section from "./components/Hero_Section/Hero_Section";
 import Slider from "./components/Slider/Slider";
@@ -19,7 +18,7 @@ import Products from "./pages/Products";
 import Blogs from "./pages/Blogs";
 import Counting from "./pages/Counting";
 import Client from "./pages/Client";
-import Appointment from "./pages/Appointment";
+import Appointment from "./components/Appointment";
 import Footer from "./pages/Footer";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
