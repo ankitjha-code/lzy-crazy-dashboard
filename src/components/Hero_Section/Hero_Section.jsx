@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Delete,
   DeleteIcon,
@@ -9,10 +9,24 @@ import {
 } from "lucide-react";
 
 const Hero_Section = () => {
+  const [image, setImage] = useState("");
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
+  };
   return (
     <div className="p-5">
       {" "}
       <div className="min-h-150 w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5 ">
+        {image && (
+          <img
+            src={image}
+            alt="Preview"
+            className="mt-3 w-32 h-32 rounded-lg object-cover border border-gray-300 mb-5"
+          />
+        )}
         <div className="w-full md:w-[80%] space-y-5">
           {/* File Input */}
           <div className="w-full md:w-[73%] border border-gray-400 text-gray-700 py-2 rounded-[7px]">
@@ -22,7 +36,13 @@ const Hero_Section = () => {
             >
               Upload File
             </label>
-            <input id="file-upload" type="file" className="hidden" />
+            <input
+              id="file-upload"
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={handleChange}
+            />
           </div>
 
           {/* Home Input and Add Button */}

@@ -1,19 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { PlusCircle } from "lucide-react";
+
 const Header = () => {
+  const [image, setImage] = useState("");
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
+  };
+
   return (
     <div className="min-h-150 w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5">
       <div className="w-full md:w-[50%] space-y-5">
         {/* File Input */}
-        <div className="w-full border md:w-[77%]  border-gray-400 text-gray-700 py-2 rounded-[7px]">
+        {image && (
+          <img
+            src={image}
+            alt="Preview"
+            className="mt-3 w-32 h-32 rounded-lg object-cover border border-gray-300"
+          />
+        )}
+        <div className="w-full border md:w-[77%] border-gray-400 text-gray-700 py-2 rounded-[7px]">
           <label
             htmlFor="file-upload"
-            className="block w-[30%] mx-5 cursor-pointer bg-gray-200  text-center rounded-[7px]"
+            className="block w-[30%] mx-5 cursor-pointer bg-gray-200 text-center rounded-[7px]"
           >
             Upload File
           </label>
-          <input id="file-upload" type="file" className="hidden" />
+
+          <input
+            id="file-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
+          />
         </div>
+        {/* Rounded Image Preview */}
 
         {/* Home Input and Add Button */}
         <div className="flex flex-col sm:flex-row gap-3">
@@ -26,6 +51,7 @@ const Header = () => {
               className="w-full border border-gray-500 p-2 rounded-[7px]"
             />
           </div>
+
           <div className="flex items-end">
             <button className="flex items-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-100">
               <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm">
