@@ -68,14 +68,16 @@ const Footer = () => {
 
   return (
     <form className="w-full card-container max-w-[1550px] mx-auto min-h-screen bg-white rounded-xl border border-gray-200 shadow-md mb-8 px-1 py-6 md:p-6">
-      <div className="flex gap-5">
-        <div className="w-1/2 bg-white rounded-xl border border-gray-200 shadow-md p-4 text-white">
-          <label className="text-black text-2xl">Logo and Social Icon</label>
+      <div className="flex flex-col md:flex-row gap-5">
+        <div className="w-full md:w-1/2 bg-white rounded-xl border border-gray-200 shadow-md p-4 text-white">
+          <label className="text-black text-xl sm:text-2xl">
+            Logo and Social Icon
+          </label>
 
-          <div className="relative flex items-start mt-5">
+          <div className="relative flex flex-col sm:flex-row items-start mt-5 gap-4">
             <label
               htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-72 h-36 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition p-4 bg-white"
+              className="flex flex-col items-center justify-center w-full sm:w-72 h-36 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition p-4 bg-white"
             >
               <div className="flex flex-col items-center justify-center pt-2 pb-4">
                 <svg
@@ -107,7 +109,7 @@ const Footer = () => {
             </label>
 
             {selectedFile && (
-              <div className="relative ml-8 w-70 h-36 rounded-lg overflow-hidden border border-gray-300 shadow-md bg-white">
+              <div className="relative w-full sm:w-70 h-36 rounded-lg overflow-hidden border border-gray-300 shadow-md bg-white">
                 <img
                   src={selectedFile}
                   alt="Preview"
@@ -132,7 +134,7 @@ const Footer = () => {
 
             <label
               htmlFor="social-upload"
-              className="flex flex-col items-center justify-center w-72 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition p-4 bg-white"
+              className="flex flex-col items-center justify-center w-full sm:w-72 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition p-4 bg-white"
             >
               <div className="flex flex-col items-center justify-center">
                 <svg
@@ -169,7 +171,7 @@ const Footer = () => {
               {socialIcons.map((icon) => (
                 <div
                   key={icon.id}
-                  className="flex items-center gap-4 border border-gray-300 p-2 rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border border-gray-300 p-2 rounded-lg"
                 >
                   <div className="relative w-16 h-16 overflow-hidden border border-gray-300 rounded-md">
                     <img
@@ -189,7 +191,7 @@ const Footer = () => {
                   <input
                     type="url"
                     placeholder="https://your-link.com"
-                    className="flex-1 border border-gray-400 p-2 rounded-md text-black"
+                    className="w-full sm:flex-1 border border-gray-400 p-2 rounded-md text-black"
                     value={icon.link}
                     onChange={(e) => handleLinkChange(icon.id, e.target.value)}
                   />
@@ -197,6 +199,7 @@ const Footer = () => {
               ))}
             </div>
           </div>
+
           <div className="flex-1 mt-6">
             <label
               htmlFor="home"
@@ -213,11 +216,12 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="w-1/2 bg-white rounded-xl border border-gray-200 shadow-md p-4 text-white">
-          <label className="text-black text-2xl">
-            Resent Post and Working Hours
+        <div className="w-full md:w-1/2 bg-white rounded-xl border border-gray-200 shadow-md p-4 text-white">
+          <label className="text-black text-xl sm:text-2xl">
+            Recent Post and Working Hours
           </label>
-          <div className="mt-[50px] text-center">
+
+          <div className="mt-12 text-center">
             <label className="font-semibold block mb-2 text-black">
               Recent Posts (Name + Link)
             </label>
@@ -234,12 +238,12 @@ const Footer = () => {
               {recentPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="flex items-center gap-4 border border-gray-300 p-2 rounded-lg"
+                  className="flex flex-col sm:flex-row items-stretch gap-4 border border-gray-300 p-2 rounded-lg"
                 >
                   <input
                     type="text"
                     placeholder="Enter Post Name"
-                    className="w-1/2 border border-gray-400 p-2 rounded-md text-black"
+                    className="w-full sm:w-1/2 border border-gray-400 p-2 rounded-md text-black"
                     value={post.name}
                     onChange={(e) =>
                       handleRecentPostChange(post.id, "name", e.target.value)
@@ -248,7 +252,7 @@ const Footer = () => {
                   <input
                     type="url"
                     placeholder="https://link-to-post.com"
-                    className="w-1/2 border border-gray-400 p-2 rounded-md text-black"
+                    className="w-full sm:w-1/2 border border-gray-400 p-2 rounded-md text-black"
                     value={post.link}
                     onChange={(e) =>
                       handleRecentPostChange(post.id, "link", e.target.value)
@@ -257,7 +261,7 @@ const Footer = () => {
                   <button
                     type="button"
                     onClick={() => handleRemoveRecentPost(post.id)}
-                    className="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
+                    className="self-start bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
                     title="Remove post"
                   >
                     &#10005;
@@ -267,7 +271,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="mt-[70px] text-center mt-9">
+          <div className="mt-14 text-center">
             <label className="font-semibold block mb-2 text-black">
               Working Days & Time
             </label>
@@ -284,12 +288,12 @@ const Footer = () => {
               {dayTimes.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-4 border border-gray-300 p-2 rounded-lg"
+                  className="flex flex-col sm:flex-row items-stretch gap-4 border border-gray-300 p-2 rounded-lg"
                 >
                   <input
                     type="text"
                     placeholder="Enter Day (e.g., Monday)"
-                    className="w-1/2 border border-gray-400 p-2 rounded-md text-black"
+                    className="w-full sm:w-1/2 border border-gray-400 p-2 rounded-md text-black"
                     value={item.day}
                     onChange={(e) =>
                       handleDayTimeChange(item.id, "day", e.target.value)
@@ -298,7 +302,7 @@ const Footer = () => {
                   <input
                     type="text"
                     placeholder="Enter Time (e.g., 10:00 AM - 5:00 PM)"
-                    className="w-1/2 border border-gray-400 p-2 rounded-md text-black"
+                    className="w-full sm:w-1/2 border border-gray-400 p-2 rounded-md text-black"
                     value={item.time}
                     onChange={(e) =>
                       handleDayTimeChange(item.id, "time", e.target.value)
@@ -307,7 +311,7 @@ const Footer = () => {
                   <button
                     type="button"
                     onClick={() => handleRemoveDayTime(item.id)}
-                    className="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
+                    className="self-start bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700"
                     title="Remove"
                   >
                     &#10005;
@@ -316,8 +320,9 @@ const Footer = () => {
               ))}
             </div>
           </div>
-          <div className="flex gap-4 mt-[75px]">
-            <div className="w-1/2">
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-25">
+            <div className="w-full sm:w-1/2">
               <label
                 htmlFor="address"
                 className="font-semibold block mb-1 text-black"
@@ -331,7 +336,7 @@ const Footer = () => {
                 placeholder="Enter address here..."
               ></textarea>
             </div>
-            <div className="w-1/2">
+            <div className="w-full sm:w-1/2">
               <label
                 htmlFor="phone"
                 className="font-semibold block mb-1 text-black"
