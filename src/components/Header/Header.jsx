@@ -1,130 +1,189 @@
-import React, { useState } from "react";
-
-import { Edit, PlusCircle, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { PlusCircle, Trash2, Upload, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import axios from "../../lib/axios/axiosInstance";
 
 const Header = () => {
-  const [image, setImage] = useState("");
 
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
+  const [navItems, setNavItems] = useState([{ label: "", link: "" }]);
+  const [headerExists, setHeaderExists] = useState(false);
+
+  const { user } = useSelector((state) => state.auth);
+
+  // Handle logo file input
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
     }
   };
 
-  const data = [
-    {
-      photo:
-        "https://imgs.search.brave.com/p6-mxnlb38zbNnmfGawlb7rQJTQ1rlX4TKAnHUPXb4o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vQTlwOTI0/MWNLTHN0bkVURXMx/SE1FUGxPTmxqeF8y/SkhEMlFCTDJOcERa/WS9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVwYzNS/dlkydHdhRzkwL2J5/NWpiMjB2YVdRdk1U/TXgvTURVek9UQXdP/Qzl3YUc5MC9ieTl6/YUc5MExXOW1MV0V0/L2VXOTFibWN0ZDI5/dFpXNHQvZFhOcGJt/Y3RiVzlpYVd4bC9M/WEJvYjI1bExYTnZZ/MmxoL2JDMXRaV1Jw/WVMxemRYSm0vYVc1/bkxYUm9aUzF1WlhR/dC9jM1JoYm1ScGJt/Y3RhWE52L2JHRjBa/V1F0YjNabGNpNXEv/Y0djX2N6MDJNVEo0/TmpFeS9KbmM5TUNa/clBUSXdKbU05L2RF/ZGlXVWREYzFKMU1u/VTIvUTNFMVJsSjZX/blp1WVROWC9kR1I2/VjNWUk1uUTFheTFV/L2FscE9aRXRLZHow",
-      title: " I am good",
-    },
-    {
-      photo:
-        "https://imgs.search.brave.com/sqe0EUYwqOVBb-qwdJ5CcIEjNCjVU5QSSyU7sctM7ws/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vVHdOR2Zr/Wkd0aFVaMW82X1Rr/UTdlZ2MyOGVjUFNl/OUFReUZnZHowbllB/NC9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVuWlhS/MGVXbHRZV2RsL2N5/NWpiMjB2YVdRdk1U/WTMvTlRnNE1ERTFO/Qzl3YUc5MC9ieTlq/YUdWbGNtWjFiQzFt/L2NtbGxibVJ6TFdw/MWJYQnAvYm1jdGFH/bG5hQzExY0MxcC9i/aTF0YVdRdFlXbHlM/bXB3L1p6OXpQVFl4/TW5nMk1USW0vZHow/d0ptczlNakFtWXox/eC9lbDlhTURsSlVt/VjVlRUZQL2FtMXRa/bmRaWldOc2NHUm8v/VkdNNGVHcHZWbFpU/TFdOQi9kbWR3TkZW/elBR",
-      title: "How are you",
-    },
-  ];
+
+  // Add a new empty navItem row
+  const handleAddNavItem = () => {
+    setNavItems([...navItems, { label: "", link: "" }]);
+  };
+
+  // Handle changes to nav item inputs
+  const handleNavItemChange = (index, field, value) => {
+    const updated = [...navItems];
+    updated[index][field] = value;
+    setNavItems(updated);
+  };
+
+  // Delete nav item
+  const handleDeleteNavItem = (index) => {
+    const updated = navItems.filter((_, i) => i !== index);
+    setNavItems(updated);
+  };
+
+  // Fetch existing header on mount
+  useEffect(() => {
+    const fetchHeader = async () => {
+      console.log(user);
+      try {
+        const res = await axios.post("/header/get", { userId: user._id });
+        const header = res.data;
+        if (header) {
+          setHeaderExists(true);
+          setNavItems(header.navItems);
+          setLogoPreview(header.logoUrl);
+        }
+      } catch (err) {
+        console.log("No header found; will create new one.");
+      }
+    };
+
+    if (user?._id) fetchHeader();
+  }, [user]);
+
+  // Publish (create or update)
+  const handlePublish = async () => {
+    if (!logoFile && navItems.every((item) => !item.label || !item.link)) {
+      return alert("Please add a logo or at least one valid nav link.");
+    }
+
+    const formData = new FormData();
+    if (logoFile) formData.append("logo", logoFile);
+    formData.append("navItems", JSON.stringify(navItems));
+
+    try {
+      const res = headerExists
+        ? await axios.put("/header/update", formData)
+        : await axios.post("/header/create", formData);
+
+      alert(res.data.message || "Header saved.");
+      setHeaderExists(true);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      alert("Failed to publish header.");
+    }
+  };
+
 
   return (
-    <div className="min-h-screen w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5">
-      <div className="w-full md:w-[50%] space-y-5">
-        {/* File Input */}
-        {image && (
-          <img
-            src={image}
-            alt="Preview"
-            className="mt-3 w-32 h-32 rounded-lg object-cover border border-gray-300"
-          />
-        )}
-        <div className="w-full border md:w-[77%] border-gray-400 text-gray-700 py-2 rounded-[7px]">
-          <label
-            htmlFor="file-upload"
-            className="block w-[30%] mx-5 cursor-pointer bg-gray-200 text-center rounded-[7px]"
-          >
-            Upload File
-          </label>
-
-          <input
-            id="file-upload"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
-          />
-        </div>
-        {/* Rounded Image Preview */}
-
-        {/* Home Input and Add Button */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <label htmlFor="home" className="font-semibold block mb-1">
-              Home
-            </label>
+  <div className="min-h-screen w-full px-4 py-6 md:p-10 bg-gray-50">
+    <div className="w-full mx-auto bg-white border border-gray-200 rounded-2xl shadow-sm p-6 md:p-10">
+      <div className="w-full mx-auto md:w-[55%] space-y-8">
+        {/* File Upload Section */}
+        <div className="flex flex-1 sm:flex-row items-center justify-center gap-4">
+          <div className="relative">
             <input
-              type="text"
-              className="w-full border border-gray-500 p-2 rounded-[7px]"
+              type="file"
+              id="fileInput"
+              onChange={handleImageChange}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx"
             />
+            <label
+              htmlFor="fileInput"
+              className="flex items-center justify-center w-full px-6 py-10 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group"
+            >
+              <div className="text-center">
+                <Upload className="mx-auto h-10 w-10 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
+                    Click to upload
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    JPG, PNG, PDF up to 10MB
+                  </p>
+                </div>
+              </div>
+            </label>
           </div>
+          {logoPreview && (
+              <div className="relative aspect-square h-44 rounded-xl border border-gray-300 shadow-md bg-white">
+                <img
+                  src={logoPreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setLogoPreview(null)}
+                  className="absolute -top-3 -right-3 bg-red-500 text-white text-xs rounded-full p-1 cursor-pointer hover:bg-red-600 transition-all"
+                  title="Remove image"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            )}
+        </div>
 
-          <div className="flex items-end">
-            <button className="flex items-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-100">
-              <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm">
-                <PlusCircle />
-              </span>
-              <span className="text-sm font-semibold ml-2">Add</span>
-            </button>
-          </div>
+        {/* Nav Items Section */}
+        <div className="space-y-5">
+          {navItems.map((item, index) => (
+            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <input
+                type="text"
+                placeholder="Label (e.g. Home)"
+                value={item.label}
+                onChange={(e) => handleNavItemChange(index, "label", e.target.value)}
+                className="w-full flex-1 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none px-4 py-2 rounded-lg shadow-sm text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Link (e.g. /home)"
+                value={item.link}
+                onChange={(e) => handleNavItemChange(index, "link", e.target.value)}
+                className="w-full flex-1 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none px-4 py-2 rounded-lg shadow-sm text-sm"
+              />
+              <button
+                onClick={() => handleDeleteNavItem(index)}
+                className="text-red-500 hover:text-red-700 transition"
+                title="Delete link"
+              >
+                <Trash2 />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={handleAddNavItem}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm transition"
+          >
+            <PlusCircle /> Add Link
+          </button>
         </div>
 
         {/* Publish Button */}
-        <div className="pt-5">
-          <button className="bg-blue-600 text-white px-8 py-2 rounded-md text-lg hover:bg-blue-700 transition">
+        <div className="pt-6">
+          <button
+            onClick={handlePublish}
+            className="w-full md:w-auto bg-blue-600 text-white px-6 py-2.5 rounded-lg text-base font-semibold hover:bg-blue-700 transition-all"
+          >
             Publish
           </button>
         </div>
       </div>
-      <div className="overflow-x-auto mt-5 px-4">
-        <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
-          <thead className="bg-gray-100 text-gray-800">
-            <tr>
-              <th className="py-2 px-4 text-left">Image</th>
-              <th className="py-2 px-4 text-left">Title</th>
-              <th className="py-2 px-4 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, i) => (
-              <tr key={i} className="border-t border-gray-200">
-                <td className="py-2 px-4">
-                  <img
-                    src={item.photo}
-                    alt={item.title}
-                    className="w-12 h-12 object-cover rounded-lg"
-                  />
-                </td>
-                <td className="py-2 px-4">{item.title}</td>
-                <td className="py-2 px-4">
-                  <div className="flex flex-row items-center gap-3">
-                    <div>
-                      <button className="text-blue-600 flex flex-col items-center hover:underline cursor-pointer">
-                        <Edit size={18} />
-                      </button>
-                    </div>
-                    |
-                    <div>
-                      <button className="text-red-600 flex flex-col items-center hover:underline cursor-pointer">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
+  </div>
   );
 };
 
 export default Header;
+
+

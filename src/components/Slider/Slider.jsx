@@ -1,129 +1,313 @@
-import React, { useState } from "react";
-
-import { Edit, PlusCircle, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Edit, Trash2, Upload, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import axios from "../../lib/axios/axiosInstance";
 
 const Slider = () => {
-  const [image, setImage] = useState("");
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-  const handleChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [banners, setBanners] = useState([]);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingBanner, setEditingBanner] = useState(null);
+
+  // Fetch banners for current user
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      fetchBanners();
+    }
+  }, [user]);
+
+  const fetchBanners = async () => {
+    try {
+      const res = await axios.post("/banner/get", { userId: user._id });
+      if (res.data.success) {
+        setBanners(res.data.banners);
+      }
+    } catch (err) {
+      console.error("Error fetching banners:", err.response?.data || err.message);
     }
   };
 
-  const data = [
-    {
-      photo:
-        "https://imgs.search.brave.com/p6-mxnlb38zbNnmfGawlb7rQJTQ1rlX4TKAnHUPXb4o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vQTlwOTI0/MWNLTHN0bkVURXMx/SE1FUGxPTmxqeF8y/SkhEMlFCTDJOcERa/WS9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVwYzNS/dlkydHdhRzkwL2J5/NWpiMjB2YVdRdk1U/TXgvTURVek9UQXdP/Qzl3YUc5MC9ieTl6/YUc5MExXOW1MV0V0/L2VXOTFibWN0ZDI5/dFpXNHQvZFhOcGJt/Y3RiVzlpYVd4bC9M/WEJvYjI1bExYTnZZ/MmxoL2JDMXRaV1Jw/WVMxemRYSm0vYVc1/bkxYUm9aUzF1WlhR/dC9jM1JoYm1ScGJt/Y3RhWE52L2JHRjBa/V1F0YjNabGNpNXEv/Y0djX2N6MDJNVEo0/TmpFeS9KbmM5TUNa/clBUSXdKbU05L2RF/ZGlXVWREYzFKMU1u/VTIvUTNFMVJsSjZX/blp1WVROWC9kR1I2/VjNWUk1uUTFheTFV/L2FscE9aRXRLZHow",
-      slider: " I am good",
-    },
-    {
-      photo:
-        "https://imgs.search.brave.com/sqe0EUYwqOVBb-qwdJ5CcIEjNCjVU5QSSyU7sctM7ws/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdz/LnNlYXJjaC5icmF2/ZS5jb20vVHdOR2Zr/Wkd0aFVaMW82X1Rr/UTdlZ2MyOGVjUFNl/OUFReUZnZHowbllB/NC9yczpmaXQ6NTAw/OjA6MDowL2c6Y2Uv/YUhSMGNITTZMeTl0/WldScC9ZUzVuWlhS/MGVXbHRZV2RsL2N5/NWpiMjB2YVdRdk1U/WTMvTlRnNE1ERTFO/Qzl3YUc5MC9ieTlq/YUdWbGNtWjFiQzFt/L2NtbGxibVJ6TFdw/MWJYQnAvYm1jdGFH/bG5hQzExY0MxcC9i/aTF0YVdRdFlXbHlM/bXB3L1p6OXpQVFl4/TW5nMk1USW0vZHow/d0ptczlNakFtWXox/eC9lbDlhTURsSlVt/VjVlRUZQL2FtMXRa/bmRaWldOc2NHUm8v/VkdNNGVHcHZWbFpU/TFdOQi9kbWR3TkZW/elBR",
-      slider: "How are you",
-    },
-  ];
+  // Custom image input handler
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
+  // Handle form submit
+  const handleCreateBanner = async (e) => {
+    e.preventDefault();
+    if (!title.trim() || !logoFile) {
+      alert("Image and title are required");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("image", logoFile);
+
+    try {
+      const res = await axios.post("/banner/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data.success) {
+        fetchBanners();
+        setTitle("");
+        setDescription("");
+        setLogoFile(null);
+        setLogoPreview(null);
+      }
+    } catch (err) {
+      console.error("Error creating banner:", err.response?.data || err.message);
+    }
+  };
+
+  const openEditModal = (banner) => {
+    setEditingBanner(banner);
+    setTitle(banner.title);
+    setDescription(banner.description);
+    setLogoPreview(banner.imageUrl);
+    setEditModalOpen(true);
+  };
+
+  // Handle banner edit
+  const handleUpdateBanner = async () => {
+    if (!title.trim()) {
+      alert("Title is required");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    if (logoFile) {
+      formData.append("image", logoFile);
+    }
+
+    try {
+      const res = await axios.put(`/banner/update/${editingBanner._id}`, formData);
+      if (res.data.success) {
+        fetchBanners();
+        setEditModalOpen(false);
+        resetForm();
+      }
+    } catch (err) {
+      console.error("Update failed:", err.response?.data || err.message);
+    }
+  };
+
+  // Handle banner delete
+  const handleDeleteBanner = async (id) => {
+    try {
+      const res = await axios.delete(`/banner/delete/${id}`);
+      if (res.data.success) {
+        setBanners((prev) => prev.filter((b) => b._id !== id));
+      }
+    } catch (err) {
+      console.error("Error deleting banner:", err.response?.data || err.message);
+    }
+  };
 
   return (
-    <div>
-      {" "}
-      <div className="min-h-150 w-full p-5 border border-gray-400 rounded md:w-[90%] max-w-4xl mx-auto mt-5">
-        {image && (
-          <img
-            src={image}
-            alt="Preview"
-            className="mt-3 w-32 h-32 rounded-lg object-cover border border-gray-300 mb-5"
-          />
-        )}
-        <form className="w-full md:w-[50%] space-y-5">
-          {/* File Input */}
-          <div className="w-full border md:w-[77%] border-gray-400 text-gray-700 py-2 rounded-[7px]">
-            <label
-              htmlFor="file-upload"
-              className="block w-[30%] mx-5 cursor-pointer bg-gray-200  text-center rounded-[7px]"
-            >
-              Upload File
-            </label>
+    <div className="min-h-150 w-full p-5 border border-gray-300 rounded-2xl md:w-[90%] max-w-4xl mx-auto mt-5">
+      {/* File Upload Section */}
+      <form onSubmit={handleCreateBanner} className="space-y-6">
+         {/* file upload */}
+        <div className="flex sm:flex-row flex-wrap items-center justify-center gap-4">
+          <div className="relative flex-1 min-w-[200px]">
             <input
-              id="file-upload"
               type="file"
+              id="fileInput"
+              onChange={handleImageChange}
               className="hidden"
-              onChange={handleChange}
+              accept="image/*,.pdf,.doc,.docx"
             />
+            <label
+              htmlFor="fileInput"
+              className="flex items-center justify-center w-full px-6 py-10 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group"
+            >
+              <div className="text-center">
+                <Upload className="mx-auto h-10 w-10 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
+                    Click to upload
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    JPG, PNG, PDF up to 10MB
+                  </p>
+                </div>
+              </div>
+            </label>
           </div>
-
-          {/* Home Input and Add Button */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <label htmlFor="home" className="font-semibold block mb-1">
-                Slider
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-500 p-2 rounded-[7px]"
+          {logoPreview && (
+            <div className="relative max-h-44 rounded-xl border border-gray-300 shadow-md bg-white">
+              <img
+                src={logoPreview}
+                alt="Preview"
+                className="w-full h-full max-h-44 object-cover rounded-2xl"
               />
-            </div>
-            <div className="flex items-end">
-              <button className="flex items-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-100">
-                <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-sm">
-                  <PlusCircle />
-                </span>
-                <span className="text-sm font-semibold ml-2">Add</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setLogoFile(null);
+                  setLogoPreview(null);
+                }}
+                className="absolute -top-3 -right-3 bg-red-500 text-white text-xs rounded-full p-1 cursor-pointer hover:bg-red-600 transition-all"
+                title="Remove image"
+              >
+                <X size={20} />
               </button>
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Publish Button */}
-          <div className="pt-5">
-            <button className="bg-blue-600 text-white px-8 py-2 rounded-md text-lg hover:bg-blue-700 transition">
-              Publish
+        {/* Title Field */}
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">
+            Slider Title
+          </label>
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Description Field */}
+        <div>
+          <label className="block mb-1 font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            rows="3"
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter slider description..."
+          />
+        </div>
+
+        <div className="pt-3">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-2 rounded-md text-lg hover:bg-blue-700 transition"
+          >
+            Publish
+          </button>
+        </div>
+      </form>
+
+      {/* Banners Table */}
+      <div className="overflow-x-auto mt-10 px-4 rounded-xl">
+        <table className="min-w-full bg-white border border-gray-300 shadow-md">
+          <thead className="bg-gray-100 text-gray-800">
+            <tr>
+              <th className="py-2 px-4 text-left">Image</th>
+              <th className="py-2 px-4 text-left">Title</th>
+              <th className="py-2 px-4 text-left">Description</th>
+              <th className="py-2 px-4 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {banners.map((item) => (
+              <tr key={item._id} className="border-t border-gray-200">
+                <td className="py-2 px-4">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="max-w-[100px] object-cover rounded-lg"
+                  />
+                </td>
+                <td className="py-2 px-4 truncate overflow-hidden max-w-[200px]">{item.title}</td>
+                <td className="py-2 px-4 truncate overflow-hidden max-w-[300px]">{item.description}</td>
+                <td className="py-2 px-4">
+                  <div className="flex flex-row items-center gap-3">
+                    <button onClick={() => openEditModal(item)} className="text-blue-600 hover:underline cursor-pointer">
+                      <Edit size={18} />
+                    </button>
+                    |
+                    <button
+                      onClick={() => handleDeleteBanner(item._id)}
+                      className="text-red-600 hover:underline cursor-pointer"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {banners.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-4 text-gray-500">
+                  No banners found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Edit Modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-lg space-y-5 relative">
+            <button
+              onClick={() => {setEditModalOpen(false); resetForm();}}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-xl font-semibold">Edit Banner</h2>
+
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              className="w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="Description"
+              rows="3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <div className="flex flex-col gap-4">
+              <input type="file" onChange={handleImageChange} accept="image/*" />
+              {logoPreview && (
+                <img src={logoPreview} alt="Preview" className="h-40 rounded-lg" />
+              )}
+            </div>
+            <button
+              onClick={handleUpdateBanner}
+              className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+            >
+              Update
             </button>
           </div>
-        </form>
-        <div className="overflow-x-auto mt-5 px-4">
-          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
-            <thead className="bg-gray-100 text-gray-800">
-              <tr>
-                <th className="py-2 px-4 text-left">Image</th>
-                <th className="py-2 px-4 text-left">Slider</th>
-
-                <th className="py-2 px-4 text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item, i) => (
-                <tr key={i} className="border-t border-gray-200">
-                  <td className="py-2 px-4">
-                    <img
-                      src={item.photo}
-                      alt={item.title}
-                      className="w-12 h-12 object-cover rounded-lg"
-                    />
-                  </td>
-                  <td className="py-2 px-4">{item.slider}</td>
-
-                  <td className="py-2 px-4">
-                    <div className="flex flex-row items-center gap-3">
-                      <div>
-                        <button className="text-blue-600 flex flex-col items-center hover:underline cursor-pointer">
-                          <Edit size={18} />
-                        </button>
-                      </div>
-                      |
-                      <div>
-                        <button className="text-red-600 flex flex-col items-center hover:underline cursor-pointer">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      </div>
+      )}
     </div>
   );
 };
