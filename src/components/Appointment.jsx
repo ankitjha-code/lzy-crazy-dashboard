@@ -1,305 +1,65 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Upload, Plus, Edit2, Trash2, FileText, X } from "lucide-react";
+import { Reply, Trash2 } from "lucide-react";
 
 const Appointment = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imgPreview, setImagePreview] = useState("");
+  const columns = ["Name", "Email", "Phone", "Massage", "Action"];
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
+  const data = [
+    {
+      name: "Hussain",
+      massage: "Sample your website is fast",
+      email: "hussain@gmail.com",
+      phone: 9898983434,
     },
-  });
-
-  const onSubmit = (data) => {
-    const submitData = {
-      ...data,
-      file: selectedFile,
-      titleItems,
-      descriptionItems,
-    };
-    console.log("Form submitted:", submitData);
-    alert("Form submitted successfully!");
-    reset();
-    setSelectedFile(null);
-    document.getElementById("fileInput").value = "";
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const removeFile = () => {
-    setSelectedFile(null);
-    setImagePreview("");
-    document.getElementById("fileInput").value = "";
-  };
-
+    {
+      name: "Ram",
+      massage: "Hello I want to make website",
+      email: "ram@gmail.com",
+      phone: 9898983434,
+    },
+  ];
   return (
-    <div className="w-full max-w-[1550px] mx-auto min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-200 shadow-sm">
-        <div className="space-y-6">
-          {/* File Upload Section */}
-
-          <div className="w-full flex flex-wrap md:flex-row gap-2 items-center justify-between relative">
-            <input
-              type="file"
-              id="fileInput"
-              onChange={handleFileChange}
-              className="hidden"
-              accept="image/*,.pdf,.doc,.docx"
-            />
-            <label
-              htmlFor="fileInput"
-              className="flex-1 min-w-40 flex items-center justify-center  px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200 group"
-            >
-              <div className="text-center">
-                <Upload className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
-                <div className="mt-4">
-                  <p className="text-base sm:text-lg font-medium text-gray-700 group-hover:text-blue-600">
-                    Click to upload file
-                  </p>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    PNG, JPG, PDF up to 10MB
-                  </p>
-                </div>
-              </div>
-            </label>
-
-            {imgPreview && (
-              <div className="relative flex items-center justify-between p-3 rounded-md border border-gray-200 shadow-md">
-                <img
-                  src={imgPreview}
-                  alt="Preview"
-                  className="object-cover max-h-36 rounded-sm"
-                />
-                <button
-                  type="button"
-                  onClick={removeFile}
-                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full transition-colors duration-200 flex-shrink-0 ml-2"
-                >
-                  <X className="h-6 w-6 text-red-100 hover:text-white" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Title Section */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-900">
-              Title
-            </label>
-
-            <div className="flex items-center gap-y-2 flex-wrap space-x-2 sm:space-x-3">
-              <input
-                type="text"
-                {...register("title", {
-                  required: "title is required",
-                  minLength: {
-                    value: 2,
-                    message: "Title must be at least 2 characters",
-                  },
-                })}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                placeholder="Title"
-              />
-
-              <div className="flex items-center justify-between space-x-4 md:space-x-2 flex-shrink-0">
-                <button
-                  type="button"
-                  className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                >
-                  Add
-                  <Plus className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition-colors"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-
-                <button
-                  type="button"
-                  className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            {errors.title && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          {/* Description Section */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-900">
-              Description
-            </label>
-
-            <div className="flex items-center flex-wrap gap-y-2 space-x-2 sm:space-x-3">
-              <input
-                type="text"
-                {...register("description", {
-                  required: "description is required",
-                  minLength: {
-                    value: 2,
-                    message: "description must be at least 2 characters",
-                  },
-                })}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                placeholder="Description"
-              />
-              <div className="flex items-center justify-between space-x-4 md:space-x-2 flex-shrink-0">
-                <button
-                  type="button"
-                  className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                >
-                  Add
-                  <Plus className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition-colors"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-
-                <button
-                  type="button"
-                  className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            {errors.description && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          {/* Form Fields Section */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900">Form Fields</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Name Field */}
-              <div>
-                <input
-                  {...register("name", {
-                    required: "Name is required",
-                    minLength: {
-                      value: 2,
-                      message: "Name must be at least 2 characters",
-                    },
-                  })}
-                  type="text"
-                  placeholder="Name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                />
-                {errors.name && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <input
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  type="email"
-                  placeholder="Email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Phone Field */}
-              <div>
-                <input
-                  {...register("phone", {
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^[+]?[\d\s\-\(\)]{10,}$/,
-                      message: "Please enter a valid phone number",
-                    },
-                  })}
-                  type="tel"
-                  placeholder="Phone"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                />
-                {errors.phone && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.phone.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Message Field */}
-              <div>
-                <textarea
-                  {...register("message", {
-                    required: "Message is required",
-                    minLength: {
-                      value: 10,
-                      message: "Message must be at least 10 characters",
-                    },
-                  })}
-                  placeholder="Message"
-                  rows="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base resize-vertical"
-                />
-                {errors.message && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.message.message}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              onClick={handleSubmit(onSubmit)}
-              className="w-full sm:w-auto px-6 py-2.5 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors text-sm sm:text-base"
-            >
-              Publish
-            </button>
-          </div>
+    <>
+      <form className="w-full card-container max-w-[1550px] mx-auto min-h-screen bg-white rounded-xl border border-gray-200 shadow-md mb-8 px-1 py-6 md:p-6">
+        <div className="overflow-x-auto mt-5 px-4">
+          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+            <thead className="bg-gray-100 text-gray-800">
+              <tr>
+                {columns.map((col, index) => (
+                  <th key={index} className="py-2 px-4 text-center">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, i) => (
+                <tr key={i} className="border-t border-gray-200">
+                  <td className="py-2 px-4 text-center">{item.name}</td>
+                  <td className="py-2 px-4 text-center">{item.email}</td>
+                  <td className="py-2 px-4 text-center">{item.phone}</td>
+                  <td className="py-2 px-4 text-center">{item.massage}</td>
+                  <td className="py-2 px-4 text-center">
+                    <div className="flex flex-row items-center justify-center gap-3">
+                      <div>
+                        <button className="text-blue-600 flex flex-col items-center hover:underline cursor-pointer">
+                          <Reply size={18} />
+                        </button>
+                      </div>
+                      |
+                      <div>
+                        <button className="text-red-600 flex flex-col items-center hover:underline cursor-pointer">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+      </form>
+    </>
   );
 };
 
