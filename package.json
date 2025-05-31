@@ -20,6 +20,7 @@
     "react-hook-form": "^7.56.4",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.1",
+    "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
     "tailwindcss": "^4.1.7"
   },

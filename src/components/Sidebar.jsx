@@ -21,12 +21,12 @@ export function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Header, label: "Header", path: "/header" },
-    { icon: Layout, label: "Hero Section", path: "/hero-section" },
+  
     { icon: Image, label: "Banner", path: "/banner" },
     { icon: Info, label: "About Us", path: "/about-us" },
     { icon: Package, label: "Product", path: "/product" },
     { icon: FileText, label: "Blogs", path: "/blogs" },
-    { icon: Calculator, label: "Counting", path: "/counting" },
+  
     { icon: Users, label: "Clients", path: "/clients" },
     { icon: Calendar, label: "Appointment", path: "/appointment" },
     { icon: Footer, label: "Footer", path: "/footer" },
