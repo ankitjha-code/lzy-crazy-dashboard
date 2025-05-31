@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {useDispatch} from "react-redux"
+import {login} from "../lib/redux/authSlice"
+import axios from "../lib/axios/axiosInstance"
+
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -12,6 +16,7 @@ const Auth = () => {
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLoginChange = (e) =>
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -19,12 +24,17 @@ const Auth = () => {
   const handleRegisterChange = (e) =>
     setRegisterData({ ...registerData, [e.target.name]: e.target.value });
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", loginData);
-    // Simulate successful login
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/dashboard");
+    try {
+      const { data } = await axios.post("/users/login", loginData);
+      dispatch(login({ success: true, data: data.user }));
+      navigate("/dashboard"); // or wherever you want to redirect after login
+    } catch (error) {
+      console.error("Login failed:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Login failed");
+    }
+
   };
 
   const handleRegisterSubmit = (e) => {

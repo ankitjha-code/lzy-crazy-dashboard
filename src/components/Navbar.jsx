@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
+import {logout} from "../lib/redux/authSlice";
+import axios from "../lib/axios/axiosInstance";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
   const profileDropdownRef = useRef(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Map paths to page names
   const getPageName = (path) => {
@@ -50,6 +56,16 @@ const Navbar = () => {
       document.body.style.overflow = "auto";
     };
   }, [isMenuOpen]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.get("/users/logout", { withCredentials: true }); // send cookie
+      dispatch(logout()); // clear redux & localStorage
+      navigate("/auth"); // redirect to login page
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <>
@@ -192,9 +208,9 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <Link
-                to="/auth"
+              <button
                 className="flex items-center p-2 w-full text-left rounded-lg hover:bg-gray-100 text-gray-700"
+                onClick={(e)=>{setIsProfileDropdownOpen(false); handleLogout();}}
               >
                 <svg
                   className="w-5 h-5 mr-3 text-gray-500"
@@ -211,7 +227,7 @@ const Navbar = () => {
                   ></path>
                 </svg>
                 <span>Logout</span>
-              </Link>
+              </button>
             </li>
           </ul>
         </div>
@@ -375,10 +391,9 @@ const Navbar = () => {
                       </svg>
                       Profile
                     </Link>
-                    <Link
-                      to="/auth"
+                    <button
+                      onClick={(e)=>{setIsProfileDropdownOpen(false); handleLogout();}}
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsProfileDropdownOpen(false)}
                     >
                       <svg
                         className="w-5 h-5 mr-3 text-gray-500"
@@ -395,7 +410,7 @@ const Navbar = () => {
                         ></path>
                       </svg>
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>

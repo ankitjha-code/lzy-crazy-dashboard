@@ -1,15 +1,29 @@
 import React, { useState } from "react";
+import {useDispatch} from "react-redux"
+import {login} from "../lib/redux/authSlice"
+import axios from "../lib/axios/axiosInstance"
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
-    // Add your login logic or API call here
+    try {
+      const { data } = await axios.post("/users/login", formData);
+      dispatch(login({ success: true, data: data.user }));
+      navigate("/dashboard"); // or wherever you want to redirect after login
+    } catch (error) {
+      console.error("Login failed:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Login failed");
+    }
+
   };
 
   return (
