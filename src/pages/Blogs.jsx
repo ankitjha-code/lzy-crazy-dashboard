@@ -1,191 +1,250 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "../lib/axios/axiosInstance"; // Axios instance with baseURL
 import { Plus, Trash2, Pencil } from "lucide-react";
 
 const Blogs = () => {
-  const [blogTitle, setBlogTitle] = useState("");
+  // State variables
+  const [title, setTitle] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [tempBlogs, setTempBlogs] = useState([]);
-  const [blogs, setBlogs] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [blogList, setBlogList] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setSelectedImage(reader.result);
-      reader.readAsDataURL(file);
+  const token = localStorage.getItem("token"); // JWT token from localStorage
+
+  // Fetch blogs on component mount
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  // Fetch all blogs from backend
+  const fetchBlogs = async () => {
+    try {
+      const res = await axios.get("/blogs/blogs", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBlogList(res.data);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
     }
   };
 
-  const handleAdd = () => {
-    if (!blogTitle.trim() || !selectedImage) return;
+  // Handle image file input change
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const newBlog = {
-      title: blogTitle.trim(),
-      image: selectedImage,
-    };
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG, JPEG, PNG files are allowed");
+      return;
+    }
 
-    setTempBlogs([...tempBlogs, newBlog]);
-    setBlogTitle("");
+    setSelectedImage(file);
+
+    // Create a preview image URL
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewImage(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  // Reset form inputs & editing state
+  const resetForm = () => {
+    setTitle("");
     setSelectedImage(null);
+    setPreviewImage(null);
+    setEditingId(null);
   };
 
-  const handlePublish = () => {
-    if (tempBlogs.length === 0) return;
+  // Add new blog
+  const handleAdd = async () => {
+    if (!title.trim()) return alert("Please enter title");
 
-    setBlogs([...blogs, ...tempBlogs]);
-    setTempBlogs([]);
+    try {
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      if (selectedImage) formData.append("image", selectedImage);
+
+      const res = await axios.post("/blogs/Addblogs", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert(res.data.message || "Blog added successfully");
+      fetchBlogs();
+      resetForm();
+    } catch (error) {
+      console.error("Add error:", error);
+      alert(error.response?.data?.message || "Failed to add blog");
+    }
   };
 
-  const handleDelete = (index) => {
-    const updated = blogs.filter((_, i) => i !== index);
-    setBlogs(updated);
-  };
-
-  const handleEdit = (index) => {
-    const blog = blogs[index];
-    setBlogTitle(blog.title);
-    setSelectedImage(blog.image);
-    setEditingIndex(index);
-  };
-
-  const handleUpdate = () => {
-    if (!blogTitle.trim() || !selectedImage || editingIndex === null) return;
-
-    const updatedBlogs = [...blogs];
-    updatedBlogs[editingIndex] = {
-      title: blogTitle.trim(),
-      image: selectedImage,
-    };
-
-    setBlogs(updatedBlogs);
-    setBlogTitle("");
+  // Edit blog: fill form with selected blog data
+  const handleEdit = (item) => {
+    setTitle(item.title || "");
+    setPreviewImage(
+      item.image?.startsWith("http")
+        ? item.image
+        : `http://localhost:4000/${item.image}`
+    );
     setSelectedImage(null);
-    setEditingIndex(null);
+    setEditingId(item._id);
+  };
+
+  // Update existing blog
+  const handleUpdate = async () => {
+    if (!title.trim()) return alert("Please enter title");
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      if (selectedImage) formData.append("image", selectedImage);
+
+      const res = await axios.put(`/blogs/editblogs/${editingId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert(res.data.message || "Blog updated successfully");
+      fetchBlogs();
+      resetForm();
+    } catch (error) {
+      console.error("Update error:", error);
+      alert(error.response?.data?.message || "Failed to update blog");
+    }
+  };
+
+  // Delete blog
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure to delete this blog?")) return;
+
+    try {
+      const res = await axios.delete(`/blogs/delblogs/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert(res.data.message || "Deleted successfully");
+      fetchBlogs();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert(error.response?.data?.message || "Failed to delete blog");
+    }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-8 mt-16 bg-white shadow-lg rounded-lg">
-      {/* Image Upload */}
-      <div className="mb-6">
+    <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-16">
+      <h2 className="text-2xl font-semibold mb-6">
+        {editingId ? "Edit Blog" : "Create Blog"}
+      </h2>
+
+      {/* Image Upload Input */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Upload Image</label>
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg, image/jpg, image/png"
           onChange={handleImageChange}
-          className="block w-60 border border-gray-300 rounded px-4 py-3 text-base"
+          className="border border-gray-300 rounded px-4 py-2 w-full"
         />
-        {selectedImage && (
+        {previewImage && (
           <img
-            src={selectedImage}
+            src={previewImage}
             alt="Preview"
-            className="mt-4 w-60 h-auto rounded border border-gray-300"
+            className="mt-4 w-48 h-auto rounded border border-gray-300 object-cover"
           />
         )}
       </div>
 
-      {/* Blog Title Input */}
-      <label className="block text-base font-semibold mb-2">Blog Title</label>
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {/* Title Input */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Title</label>
         <input
           type="text"
-          value={blogTitle}
-          onChange={(e) => setBlogTitle(e.target.value)}
-          placeholder="Enter blog title"
-          className="flex-1 border border-gray-300 rounded px-4 py-3 text-base"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter title"
+          className="w-full border border-gray-300 rounded px-4 py-2"
         />
-        {editingIndex === null ? (
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={editingId ? handleUpdate : handleAdd}
+          className={`flex items-center gap-2 px-4 py-2 rounded text-white ${
+            editingId
+              ? "bg-yellow-500 hover:bg-yellow-600"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          <Plus size={16} />
+          {editingId ? "Update" : "Add"}
+        </button>
+
+        {editingId && (
           <button
-            onClick={handleAdd}
-            className="flex items-center justify-center gap-2 px-5 py-3 border border-gray-300 rounded text-base hover:bg-blue-50 transition"
+            onClick={resetForm}
+            className="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600"
           >
-            <Plus className="w-5 h-5" /> Add
-          </button>
-        ) : (
-          <button
-            onClick={handleUpdate}
-            className="flex items-center justify-center gap-2 px-5 py-3 border border-yellow-300 bg-yellow-100 text-base rounded hover:bg-yellow-200 transition"
-          >
-            <Pencil className="w-5 h-5" /> Update
+            Cancel
           </button>
         )}
       </div>
 
-      {/* Publish Button */}
-      <button
-        onClick={handlePublish}
-        disabled={tempBlogs.length === 0}
-        className={`text-base font-semibold px-8 py-3 rounded transition ${
-          tempBlogs.length === 0
-            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-700"
-        }`}
-      >
-        Publish
-      </button>
-
-      {/* Unpublished Blogs List */}
-      {tempBlogs.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-base font-medium text-gray-600 mb-2">
-            Unpublished Blogs:
-          </h3>
-          <ul className="list-disc list-inside text-gray-500">
-            {tempBlogs.map((item, idx) => (
-              <li key={idx}>{item.title}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Published Blogs Table */}
-      {blogs.length > 0 ? (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Published Blogs</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="py-3 px-4 text-left border-b">Image</th>
-                  <th className="py-3 px-4 text-left border-b">Blog Title</th>
-                  <th className="py-3 px-4 text-left border-b">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {blogs.map((blog, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-3 px-4">
+      {/* Blog List Table */}
+      {blogList.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Published Blogs</h3>
+          <table className="w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border-b">Image</th>
+                <th className="p-3 border-b">Title</th>
+                <th className="p-3 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {blogList.map((item) => (
+                <tr key={item._id}>
+                  <td className="p-3 border-b">
+                    {item.image ? (
                       <img
-                        src={blog.image}
-                        alt="blog"
+                        src={
+                          item.image.startsWith("http")
+                            ? item.image
+                            : `http://localhost:4000/${item.image}`
+                        }
+                        alt="Blog"
                         className="w-16 h-16 object-cover rounded border"
                       />
-                    </td>
-                    <td className="py-3 px-4 text-base">{blog.title}</td>
-                    <td className="py-3 px-4 flex gap-4">
-                      <button
-                        onClick={() => handleEdit(index)}
-                        className="text-blue-600 hover:underline flex items-center gap-1"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <span>|</span>
-                      <button
-                        onClick={() => handleDelete(index)}
-                        className="text-red-600 hover:underline flex items-center gap-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <span className="text-gray-400 italic">No image</span>
+                    )}
+                  </td>
+                  <td className="p-3 border-b">{item.title}</td>
+                  <td className="p-3 border-b flex gap-3">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="text-red-600 hover:underline flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <p className="mt-10 text-gray-500 text-center">
-          No blogs published yet.
-        </p>
       )}
     </div>
   );
