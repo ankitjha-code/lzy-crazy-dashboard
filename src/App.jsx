@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -42,9 +41,8 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   return (
     <Provider store={store}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
+      <Routes>
+        <Route path="/" element={<Layout />}>
             {/* Auth route - accessible without login */}
             <Route path="auth" element={<Auth />} />
 
@@ -156,7 +154,6 @@ const App = () => {
             <Route path="*" element={<Navigate to="/auth" replace />} />
           </Route>
         </Routes>
-      </Router>
     </Provider>
   );
 };
