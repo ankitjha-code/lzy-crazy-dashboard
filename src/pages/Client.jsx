@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 const Client = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [headTitle, setHeadTitle] = useState("");
   const [image, setImage] = useState(null);
 
   const [TestimonialsList, setTestimonialsList] = useState([]);
@@ -16,14 +15,13 @@ const Client = () => {
 
   const [editProduct, setEditProduct] = useState(null);
   const [editTitle, setEditTitle] = useState("");
-  const [editHeadTitle, setEditHeadTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editImage, setEditImage] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const token = localStorage.getItem("token");
 
   // Fixed validation to check for trimmed values
-  const isFormComplete = description && title && headTitle && image;
+  const isFormComplete = description && title;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -42,36 +40,25 @@ const Client = () => {
 
     setLoading(true);
     try {
-      const formData = new FormData();
       if (image) formData.append("image", image);
-
-      formData.append("title", title);
-      formData.append("head_title", headTitle);
-      formData.append("description", description);
-      console.log("Form Data:", formData); // Debug logging
 
       const { data } = await instance.post(
         "/testimonials/add-testimonial",
         {
           image: image,
           title: title,
-          head_title: headTitle,
           description: description,
         },
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (data.success) {
+      if (data) {
         toast.success(data.message || "Testimonial added successfully");
         getTestimonialsList();
         setImage(null);
         setTitle("");
-        setHeadTitle("");
         setDescription("");
       } else {
         toast.error(data.message || "Failed to add testimonial");
@@ -87,14 +74,14 @@ const Client = () => {
 
   const deleteTestimonial = async (id) => {
     try {
-      const { data } = await instance.delete(
+      const response = await instance.delete(
         `/testimonials/delete-testimonial/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (data.success) {
+      const data = response?.data;
+      if (data) {
         toast.success(data.message || "Testimonial deleted successfully");
         getTestimonialsList(); // Refresh the list after deletion
       } else {
@@ -142,20 +129,15 @@ const Client = () => {
   const handleEditSave = async () => {
     setLopupLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("title", editTitle);
-      formData.append("head_title", editHeadTitle);
-      formData.append("description", editDescription);
-      if (editImage) formData.append("image", editImage);
-
       const { data } = await instance.put(
         `/testimonials/update-testimonial/${editProduct._id}`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
+          title: editTitle,
+          description: editDescription,
+          image: editImage,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -209,19 +191,7 @@ const Client = () => {
             </div>
           )}
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Head Title
-          </label>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center mb-1">
-            <input
-              type="text"
-              className="w-full sm:w-[23vw] border border-gray-300 rounded-md py-2 px-2 text-sm focus:outline-none"
-              value={headTitle}
-              onChange={(e) => setHeadTitle(e.target.value)}
-            />
-          </div>
-        </div>
+
         {/* Title Section */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -267,12 +237,6 @@ const Client = () => {
           {loading ? "Loading..." : "Publish"}
         </button>
 
-        {/* Debug info - can be removed after fixing */}
-        <div className="mt-4 text-xs text-gray-500">
-          Form complete: {isFormComplete ? "Yes" : "No"} | Title:{" "}
-          {title ? "✓" : "✗"} | Head title: {headTitle ? "✓" : "✗"} |
-          Description: {description ? "✓" : "✗"}
-        </div>
 
         {/* Testimonials List */}
         {TestimonialsList?.length > 0 ? (
@@ -326,7 +290,6 @@ const Client = () => {
                           onClick={() => {
                             setEditProduct(testimonial);
                             setEditTitle(testimonial.title);
-                            setEditHeadTitle(testimonial.head_title);
                             setEditDescription(testimonial.description);
                             setEditImage(null);
                           }}
@@ -354,15 +317,7 @@ const Client = () => {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Client Name"
-                className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
-              />
-
-              <input
-                type="text"
-                value={editHeadTitle}
-                onChange={(e) => setEditHeadTitle(e.target.value)}
-                placeholder="Client Title"
+                placeholder="Title"
                 className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
               />
 
@@ -370,7 +325,7 @@ const Client = () => {
                 type="text"
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Client Review"
+                placeholder="Description"
                 className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
               />
 
