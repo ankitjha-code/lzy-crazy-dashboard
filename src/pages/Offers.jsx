@@ -25,9 +25,18 @@ const Offers = () => {
 
   const fetchOffers = async () => {
     try {
-      const res = await axios.post("/specialOffers/get-specialOffer", {
-        userId: user._id,
-      });
+      // Log the user object to verify structure
+      console.log('User object for offers:', user);
+      
+      if (!user?._id) {
+        console.error('No user ID available');
+        toast.error('User ID not available. Please ensure you are logged in.');
+        return;
+      }
+      
+      // Use POST and include userId in the request body as required by backend
+      const res = await axios.post("/specialOffers/specialOffer/get", { userId: user._id });
+      
       if (res.data.success) {
         setOffers(res.data.specialOffers);
       }
@@ -36,6 +45,7 @@ const Offers = () => {
         "Error fetching offers:",
         err.response?.data || err.message
       );
+      toast.error("Failed to fetch offers");
     }
   };
 
@@ -60,7 +70,15 @@ const Offers = () => {
     e.preventDefault();
     setLoading(true);
     if (!title.trim() || !logoFile) {
-      alert("Image and title are required");
+      toast.error("Image and title are required");
+      setLoading(false);
+      return;
+    }
+
+    // Make sure user is authenticated
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to create offers");
+      setLoading(false);
       return;
     }
 
@@ -70,6 +88,7 @@ const Offers = () => {
     formData.append("image", logoFile);
 
     try {
+      // Use the correct endpoint for creating a special offer
       const res = await axios.post("/specialOffers/specialOffer", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -77,15 +96,14 @@ const Offers = () => {
       });
 
       if (res.data.success) {
-        setLoading(false);
+        toast.success("Special offer created successfully");
         fetchOffers();
-        setTitle("");
-        setDescription("");
-        setLogoFile(null);
-        setLogoPreview(null);
+        resetForm();
       }
     } catch (err) {
       console.error("Error creating offer:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Failed to create offer");
+    } finally {
       setLoading(false);
     }
   };
@@ -102,7 +120,22 @@ const Offers = () => {
   const handleUpdateOffer = async () => {
     setPopupLoading(true);
     if (!title.trim()) {
-      alert("Title is required");
+      toast.error("Title is required");
+      setPopupLoading(false);
+      return;
+    }
+
+    // Check if editingOffer exists
+    if (!editingOffer || !editingOffer._id) {
+     
+      setPopupLoading(false);
+      return;
+    }
+    
+    // Make sure user is authenticated
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to update offers");
+      setPopupLoading(false);
       return;
     }
 
@@ -114,33 +147,48 @@ const Offers = () => {
     }
 
     try {
+      // Use the correct endpoint for updating a special offer
       const res = await axios.put(
         `/specialOffers/specialOffer/${editingOffer._id}`,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
       if (res.data.success) {
-        toast.success(res.data.message);
-        setPopupLoading(false);
+        toast.success(res.data.message || "Offer updated successfully");
         fetchOffers();
         setEditModalOpen(false);
         resetForm();
       }
     } catch (err) {
       console.error("Update failed:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Failed to update offer");
+    } finally {
       setPopupLoading(false);
     }
   };
 
   // Handle offer delete
   const handleDeleteOffer = async (id) => {
+    // Make sure user is authenticated
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to delete offers");
+      return;
+    }
+    
     try {
+      // Use the correct endpoint for deleting a special offer
       const res = await axios.delete(`/specialOffers/specialOffer/${id}`);
       if (res.data.success) {
-        toast.success(res.data.message);
+        toast.success(res.data.message || "Offer deleted successfully");
         setOffers((prev) => prev.filter((b) => b._id !== id));
       }
     } catch (err) {
       console.error("Error deleting offer:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Failed to delete offer");
     }
   };
 
