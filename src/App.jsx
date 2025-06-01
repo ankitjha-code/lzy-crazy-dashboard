@@ -20,8 +20,9 @@ import Appointment from "./components/Appointment";
 import Footer from "./pages/Footer";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
-import store from "./lib/redux/store"
+import store from "./lib/redux/store";
 import { Provider } from "react-redux";
+import Offers from "./pages/Offers";
 
 // Protected route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -43,117 +44,118 @@ const App = () => {
     <Provider store={store}>
       <Routes>
         <Route path="/" element={<Layout />}>
-            {/* Auth route - accessible without login */}
-            <Route path="auth" element={<Auth />} />
+          {/* Auth route - accessible without login */}
+          <Route path="auth" element={<Auth />} />
 
-            {/* Protected routes - require login */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Navigate to="/dashboard" replace />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="header"
-              element={
-                <ProtectedRoute>
-                  <Header />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="hero-section"
-              element={
-                <ProtectedRoute>
-                  <Hero_Section />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="banner"
-              element={
-                <ProtectedRoute>
-                  <Slider />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="about-us"
-              element={
-                <ProtectedRoute>
-                  <AboutUsForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="product"
-              element={
-                <ProtectedRoute>
-                  <Products />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="blogs"
-              element={
-                <ProtectedRoute>
-                  <Blogs />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="counting"
-              element={
-                <ProtectedRoute>
-                  <Counting />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="clients"
-              element={
-                <ProtectedRoute>
-                  <Client />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="appointment"
-              element={
-                <ProtectedRoute>
-                  <Appointment />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="footer"
-              element={
-                <ProtectedRoute>
-                  <Footer />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/auth" replace />} />
-          </Route>
-        </Routes>
+          {/* Protected routes - require login */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="header"
+            element={
+              <ProtectedRoute>
+                <Header />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="hero-section"
+            element={
+              <ProtectedRoute>
+                <Hero_Section />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="banner"
+            element={
+              <ProtectedRoute>
+                <Slider />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="about-us"
+            element={
+              <ProtectedRoute>
+                <AboutUsForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="product"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="blogs"
+            element={
+              <ProtectedRoute>
+                <Blogs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="counting"
+            element={
+              <ProtectedRoute>
+                <Counting />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="clients"
+            element={
+              <ProtectedRoute>
+                <Client />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="offers" element={<Offers />} />
+          <Route
+            path="appointment"
+            element={
+              <ProtectedRoute>
+                <Appointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="footer"
+            element={
+              <ProtectedRoute>
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
+        </Route>
+      </Routes>
     </Provider>
   );
 };

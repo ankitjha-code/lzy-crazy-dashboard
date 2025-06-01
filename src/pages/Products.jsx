@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import instance from "../lib/axios/axiosInstance";
 import toast from "react-hot-toast";
 import { Edit, Trash2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Products = () => {
   const [title, setTitle] = useState("");
@@ -14,6 +15,8 @@ const Products = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editImage, setEditImage] = useState(null);
+  const { user } = useSelector((state) => state.auth);
+  const token = localStorage.getItem("token");
 
   const isFormComplete = image && price && title;
 
@@ -31,10 +34,22 @@ const Products = () => {
       formData.append("image", image);
       formData.append("title", title);
       formData.append("price", price);
+      console.log("Sending Data:", {
+        title,
+        price,
+        image: image ? image.name : null,
+      });
+      console.log("Form Data:", formData);
 
-      const { data } = await instance.post("/products/add-product", formData);
-      if (data.success) {
-        toast.success(data.message);
+      const { data } = await instance.post("/products/add-product", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (data.success || data.message) {
+        toast.success(data.message || "Product added successfully");
         setImage(null);
         setTitle("");
         setPrice("");
@@ -42,19 +57,22 @@ const Products = () => {
       }
     } catch (error) {
       console.log("Error uploading product:", error);
-      toast.error("Upload failed");
+      toast.error(error.response?.data?.message || "Upload failed");
     }
     setLoading(false);
   };
 
   const deleteProduct = async (id) => {
     try {
-      const { data } = await instance.delete(`/products/delete-product/${id}`);
-      if (data.success) {
-        toast.success(data.message);
-        setProductList((prev) => prev.filter((product) => product._id !== id));
+      const { data } = await instance.delete(`/products/delete-product/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success || data.message) {
+        toast.success(data.message || "Product deleted successfully");
+        getProductList(); // Refresh the list after deletion
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Delete failed");
       }
     } catch (error) {
       console.log(error);
@@ -64,13 +82,17 @@ const Products = () => {
 
   const getProductList = async () => {
     try {
-      const { data } = await instance.get("/products/get-product");
-      if (data.success) {
-        setProductList(data.products);
+      // Use POST just like the blogs component
+      const { data } = await instance.post("/products/get-product", {
+        userId: user._id,
+      });
+
+      if (data) {
+        setProductList(Array.isArray(data) ? data : data.products || []);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Failed to fetch products");
     }
   };
 
@@ -83,19 +105,25 @@ const Products = () => {
       if (editImage) formData.append("image", editImage);
 
       const { data } = await instance.put(
-        `/products/update-product/${editProduct._id}`,
-        formData
+        `/products/edit-product/${editProduct._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      if (data.success) {
-        toast.success(data.message);
+      if (data.success || data.message) {
+        toast.success(data.message || "Product updated successfully");
         setLopupLoading(false);
         setEditProduct(null);
         getProductList();
       }
     } catch (error) {
       setLopupLoading(false);
-      toast.error("Update failed");
+      toast.error(error.response?.data?.message || "Update failed");
       console.error(error);
     }
   };
@@ -185,7 +213,11 @@ const Products = () => {
                     <td className="py-3 px-4">
                       {product.image ? (
                         <img
-                          src={product.image}
+                          src={
+                            product.image.startsWith("http")
+                              ? product.image
+                              : `http://localhost:4000/${product.image}`
+                          }
                           alt={product.title}
                           className="w-16 h-16 object-cover rounded"
                         />
@@ -224,7 +256,7 @@ const Products = () => {
 
       {/* Edit Popup */}
       {editProduct && (
-        <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md">
             <h2 className="text-lg font-semibold mb-4">Edit Product</h2>
 
@@ -253,7 +285,11 @@ const Products = () => {
 
             {editProduct.image && !editImage && (
               <img
-                src={editProduct.image}
+                src={
+                  editProduct.image.startsWith("http")
+                    ? editProduct.image
+                    : `http://localhost:4000/${editProduct.image}`
+                }
                 alt="Current"
                 className="w-20 h-20 object-cover mb-3"
               />

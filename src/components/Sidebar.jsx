@@ -11,6 +11,7 @@ import {
   Users,
   Calendar,
   FootprintsIcon as Footer,
+  HandCoins,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -21,13 +22,14 @@ export function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Header, label: "Header", path: "/header" },
-  
+
     { icon: Image, label: "Banner", path: "/banner" },
     { icon: Info, label: "About Us", path: "/about-us" },
     { icon: Package, label: "Product", path: "/product" },
     { icon: FileText, label: "Blogs", path: "/blogs" },
-  
+
     { icon: Users, label: "Clients", path: "/clients" },
+    { icon: HandCoins, label: "Offers", path: "/offers" },
     { icon: Calendar, label: "Appointment", path: "/appointment" },
     { icon: Footer, label: "Footer", path: "/footer" },
   ];

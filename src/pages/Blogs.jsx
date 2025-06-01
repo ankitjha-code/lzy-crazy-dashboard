@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../lib/axios/axiosInstance"; // Axios instance with baseURL
 import { Plus, Trash2, Pencil } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Blogs = () => {
   // State variables
@@ -10,7 +11,8 @@ const Blogs = () => {
   const [blogList, setBlogList] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  const token = localStorage.getItem("token"); // JWT token from localStorage
+  const token = localStorage.getItem("token");
+  const { user } = useSelector((state) => state.auth); // JWT token from localStorage
 
   // Fetch blogs on component mount
   useEffect(() => {
@@ -20,9 +22,7 @@ const Blogs = () => {
   // Fetch all blogs from backend
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get("/blogs/blogs", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.post("/blogs/blogs", { userId: user._id });
       setBlogList(res.data);
       console.log("Fetched blogs:", res.data);
     } catch (error) {

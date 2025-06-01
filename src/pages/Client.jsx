@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import instance from "../lib/axios/axiosInstance";
 import { Edit, Trash2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Client = () => {
-  // const [title, setTitle] = useState("");
-  // const [description, setDescription] = useState("");
-  // const [headTitle, setHeadTitle] = useState("");
-  // const [image, setImage] = useState(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [headTitle, setHeadTitle] = useState("");
+  const [image, setImage] = useState(null);
 
   const [TestimonialsList, setTestimonialsList] = useState([]);
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [popupLoading, setLopupLoading] = useState(false);
 
   const [editProduct, setEditProduct] = useState(null);
@@ -18,59 +19,86 @@ const Client = () => {
   const [editHeadTitle, setEditHeadTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editImage, setEditImage] = useState(null);
+  const { user } = useSelector((state) => state.auth);
+  const token = localStorage.getItem("token");
 
-  // const isFormComplete = description && title && headTitle;
+  // Fixed validation to check for trimmed values
+  const isFormComplete = description && title && headTitle && image;
 
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setImage(file);
-  //   }
-  // };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+    }
+  };
 
-  // const handlePublish = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("image", image);
-  //     formData.append("title", title);
-  //     formData.append("head_title", headTitle);
-  //     formData.append("description", description);
-  //     const { data } = await instance.post(
-  //       "/testimonials/add-testimonial",
-  //       formData
-  //     );
-  //     if (data.success) {
-  //       toast.success(data.message);
-  //       getTestimonialsList();
-  //       setImage(null);
-  //       setTitle("");
-  //       setHeadTitle("");
-  //       setDescription("");
-  //       setLoading(false);
-  //     } else {
-  //       toast.error(data.message);
-  //       setLoading(false);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast.error("Error in Tetimonial", error);
-  //     setLoading(false);
-  //   }
-  // };
+  // ...existing code...
+
+  const handlePublish = async () => {
+    if (!isFormComplete) {
+      toast.error("Please fill in all fields and select an image");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      if (image) formData.append("image", image);
+
+      formData.append("title", title);
+      formData.append("head_title", headTitle);
+      formData.append("description", description);
+      console.log("Form Data:", formData); // Debug logging
+
+      const { data } = await instance.post(
+        "/testimonials/add-testimonial",
+        {
+          image: image,
+          title: title,
+          head_title: headTitle,
+          description: description,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message || "Testimonial added successfully");
+        getTestimonialsList();
+        setImage(null);
+        setTitle("");
+        setHeadTitle("");
+        setDescription("");
+      } else {
+        toast.error(data.message || "Failed to add testimonial");
+      }
+    } catch (error) {
+      console.log("Error details:", error.response?.data);
+      toast.error(error.response?.data?.message || "Error in Testimonial");
+    }
+    setLoading(false);
+  };
+
+  // ...existing code...
 
   const deleteTestimonial = async (id) => {
     try {
       const { data } = await instance.delete(
-        `/testimonials/delete-testimonial/${id}`
+        `/testimonials/delete-testimonial/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
+
       if (data.success) {
-        toast.success(data.message);
-        setTestimonialsList((prev) =>
-          prev.filter((product) => product._id !== id)
-        );
+        toast.success(data.message || "Testimonial deleted successfully");
+        getTestimonialsList(); // Refresh the list after deletion
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Delete failed");
       }
     } catch (error) {
       console.log(error);
@@ -80,13 +108,34 @@ const Client = () => {
 
   const getTestimonialsList = async () => {
     try {
-      const { data } = await instance.get("/testimonials/get-testimonial");
-      if (data.success) {
-        setTestimonialsList(data.testimonil);
+      const { data } = await instance.post(
+        "/testimonials/get-testimonial",
+        { userId: user._id },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log("API Response:", data); // Debug logging
+
+      // Fixed to handle different response formats
+      if (data.success && Array.isArray(data.testimonials)) {
+        setTestimonialsList(data.testimonials);
+      } else if (Array.isArray(data)) {
+        setTestimonialsList(data);
+      } else if (data && typeof data === "object") {
+        // Handle case where response might have testimonials in a different property
+        const testimonials =
+          data.testimonials || data.data || data.result || [];
+        setTestimonialsList(Array.isArray(testimonials) ? testimonials : []);
+      } else {
+        setTestimonialsList([]);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.log("Testimonials fetch error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch testimonials"
+      );
     }
   };
 
@@ -101,38 +150,54 @@ const Client = () => {
 
       const { data } = await instance.put(
         `/testimonials/update-testimonial/${editProduct._id}`,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (data.success) {
-        toast.success(data.message);
+        toast.success(data.message || "Testimonial updated successfully");
         setLopupLoading(false);
         setEditProduct(null);
         getTestimonialsList();
+      } else {
+        toast.error(data.message || "Update failed");
+        setLopupLoading(false);
       }
     } catch (error) {
       setLopupLoading(false);
-      toast.error("Update failed");
+      toast.error(error.response?.data?.message || "Update failed");
       console.error(error);
     }
   };
 
   useEffect(() => {
-    getTestimonialsList();
+    if (user && user._id) {
+      getTestimonialsList();
+    }
   }, []);
 
   return (
     <div className="flex-grow p-2 sm:p-4 md:p-8 bg-[#f3f6fd] flex justify-center items-center">
       <div className="bg-white border border-gray-200 rounded-lg w-full max-w-full p-4 sm:p-8 md:p-12 mx-2 sm:mx-6 md:mx-12 mt-4">
         {/* File Upload Section */}
-        {/* <div className="mb-5">
+        <div className="mb-5">
           <label className="block w-full cursor-pointer">
             <div className="py-2 px-3 text-gray-600 border border-gray-200 rounded-md bg-white w-full sm:w-[23vw] text-left">
               <span className="bg-[#efefef] p-[2px] border-[#acacac] border-[1px] rounded text-sm">
                 Choose File
               </span>
             </div>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </label>
           {image && (
             <div className="mt-4">
@@ -156,9 +221,9 @@ const Client = () => {
               onChange={(e) => setHeadTitle(e.target.value)}
             />
           </div>
-        </div> */}
+        </div>
         {/* Title Section */}
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Title
           </label>
@@ -168,27 +233,29 @@ const Client = () => {
               className="w-full sm:w-[23vw] border border-gray-300 rounded-md py-2 px-2 text-sm focus:outline-none"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              required
             />
           </div>
-        </div> */}
+        </div>
 
         {/* Description Section */}
-        {/* <div className="mb-8">
+        <div className="mb-8">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Description
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center mb-1">
-            <input
-              type="text"
+            <textarea
               className="w-full sm:w-[23vw] border border-gray-300 rounded-md py-2 px-2 text-sm focus:outline-none"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-            />
+              rows="3"
+              required
+            ></textarea>
           </div>
-        </div> */}
+        </div>
 
         {/* Publish Button */}
-        {/* <button
+        <button
           onClick={handlePublish}
           disabled={!isFormComplete || loading}
           className={`text-base font-semibold px-5 py-3 rounded mt-4 ${
@@ -198,8 +265,16 @@ const Client = () => {
           }`}
         >
           {loading ? "Loading..." : "Publish"}
-        </button> */}
-        {/* Product List */}
+        </button>
+
+        {/* Debug info - can be removed after fixing */}
+        <div className="mt-4 text-xs text-gray-500">
+          Form complete: {isFormComplete ? "Yes" : "No"} | Title:{" "}
+          {title ? "✓" : "✗"} | Head title: {headTitle ? "✓" : "✗"} |
+          Description: {description ? "✓" : "✗"}
+        </div>
+
+        {/* Testimonials List */}
         {TestimonialsList?.length > 0 ? (
           <div className="mt-10">
             <h2 className="text-xl font-semibold mb-4">
@@ -226,7 +301,11 @@ const Client = () => {
                       <td className="py-3 px-4">
                         {testimonial.image ? (
                           <img
-                            src={testimonial.image}
+                            src={
+                              testimonial.image.startsWith("http")
+                                ? testimonial.image
+                                : `http://localhost:4000/${testimonial.image}`
+                            }
                             alt={testimonial.title}
                             className="w-16 h-16 object-cover rounded"
                           />
@@ -239,7 +318,7 @@ const Client = () => {
                       <td className="py-3 px-4">{testimonial.description}</td>
                       <td className="py-3 px-4 flex gap-3 items-center">
                         <Trash2
-                          className="text-red-500  cursor-pointer"
+                          className="text-red-500 cursor-pointer"
                           onClick={() => deleteTestimonial(testimonial._id)}
                         />
                         <Edit
@@ -261,21 +340,21 @@ const Client = () => {
           </div>
         ) : (
           <p className="mt-10 text-gray-500 text-center">
-            No products published yet.
+            No testimonials published yet.
           </p>
         )}
 
         {/* Edit Popup */}
         {editProduct && (
-          <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md">
-              <h2 className="text-lg font-semibold mb-4">Edit Product</h2>
+              <h2 className="text-lg font-semibold mb-4">Edit Testimonial</h2>
 
               <input
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Product Title"
+                placeholder="Client Name"
                 className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
               />
 
@@ -283,14 +362,15 @@ const Client = () => {
                 type="text"
                 value={editHeadTitle}
                 onChange={(e) => setEditHeadTitle(e.target.value)}
-                placeholder="Client Say"
+                placeholder="Client Title"
                 className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
               />
+
               <input
                 type="text"
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Client Say"
+                placeholder="Client Review"
                 className="w-full border border-gray-300 rounded px-4 py-2 mb-3"
               />
 
@@ -303,7 +383,11 @@ const Client = () => {
 
               {editProduct.image && !editImage && (
                 <img
-                  src={editProduct.image}
+                  src={
+                    editProduct.image.startsWith("http")
+                      ? editProduct.image
+                      : `http://localhost:4000/${editProduct.image}`
+                  }
                   alt="Current"
                   className="w-20 h-20 object-cover mb-3"
                 />

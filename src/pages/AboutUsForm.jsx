@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../lib/axios/axiosInstance";
 import { Plus, Trash2, Pencil } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const AboutUsForm = () => {
   const [title, setTitle] = useState("");
@@ -9,6 +10,7 @@ const AboutUsForm = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [aboutList, setAboutList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   const token = localStorage.getItem("token");
 
@@ -18,7 +20,9 @@ const AboutUsForm = () => {
 
   const fetchAboutList = async () => {
     try {
-      const res = await axios.get("/about/getabout");
+      const res = await axios.post("/about/getabout", {
+        userId: user._id,
+      });
       setAboutList(res.data);
       console.log("Fetched About Us entries:", res.data);
     } catch (error) {
