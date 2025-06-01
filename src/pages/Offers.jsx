@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Edit, Trash2, Upload, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import axios from "../lib/axios/axiosInstance";
-
+import toast from "react-hot-toast";
 const Offers = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -13,6 +13,8 @@ const Offers = () => {
   const [offers, setOffers] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [popupLoding, setPopupLoading] = useState(false);
 
   // Fetch offers for current user
   useEffect(() => {
@@ -23,9 +25,11 @@ const Offers = () => {
 
   const fetchOffers = async () => {
     try {
-      const res = await axios.post("/offer/get", { userId: user._id });
+      const res = await axios.post("/specialOffers/get-specialOffer", {
+        userId: user._id,
+      });
       if (res.data.success) {
-        setOffers(res.data.offers);
+        setOffers(res.data.specialOffers);
       }
     } catch (err) {
       console.error(
@@ -54,6 +58,7 @@ const Offers = () => {
   // Handle form submit
   const handleCreateOffer = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (!title.trim() || !logoFile) {
       alert("Image and title are required");
       return;
@@ -65,13 +70,14 @@ const Offers = () => {
     formData.append("image", logoFile);
 
     try {
-      const res = await axios.post("/offer/create", formData, {
+      const res = await axios.post("/specialOffers/specialOffer", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
       if (res.data.success) {
+        setLoading(false);
         fetchOffers();
         setTitle("");
         setDescription("");
@@ -80,6 +86,7 @@ const Offers = () => {
       }
     } catch (err) {
       console.error("Error creating offer:", err.response?.data || err.message);
+      setLoading(false);
     }
   };
 
@@ -93,6 +100,7 @@ const Offers = () => {
 
   // Handle offer edit
   const handleUpdateOffer = async () => {
+    setPopupLoading(true);
     if (!title.trim()) {
       alert("Title is required");
       return;
@@ -107,24 +115,28 @@ const Offers = () => {
 
     try {
       const res = await axios.put(
-        `/offer/update/${editingOffer._id}`,
+        `/specialOffers/specialOffer/${editingOffer._id}`,
         formData
       );
       if (res.data.success) {
+        toast.success(res.data.message);
+        setPopupLoading(false);
         fetchOffers();
         setEditModalOpen(false);
         resetForm();
       }
     } catch (err) {
       console.error("Update failed:", err.response?.data || err.message);
+      setPopupLoading(false);
     }
   };
 
   // Handle offer delete
   const handleDeleteOffer = async (id) => {
     try {
-      const res = await axios.delete(`/offer/delete/${id}`);
+      const res = await axios.delete(`/specialOffers/specialOffer/${id}`);
       if (res.data.success) {
+        toast.success(res.data.message);
         setOffers((prev) => prev.filter((b) => b._id !== id));
       }
     } catch (err) {
@@ -215,10 +227,15 @@ const Offers = () => {
 
         <div className="pt-3">
           <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md text-lg hover:bg-blue-700 transition"
+            onClick={handleUpdateOffer}
+            disabled={loading}
+            className={`px-5 py-2 rounded transition text-white ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Publish
+            {loading ? "Updating..." : "Update"}
           </button>
         </div>
       </form>
@@ -234,7 +251,7 @@ const Offers = () => {
             </tr>
           </thead>
           <tbody>
-            {offers.map((item) => (
+            {offers?.map((item) => (
               <tr key={item._id} className="border-t border-gray-200">
                 <td className="py-2 px-4">
                   <img
@@ -268,7 +285,7 @@ const Offers = () => {
                 </td>
               </tr>
             ))}
-            {offers.length === 0 && (
+            {offers?.length === 0 && (
               <tr>
                 <td colSpan="4" className="text-center py-4 text-gray-500">
                   No offers found
@@ -324,9 +341,14 @@ const Offers = () => {
             </div>
             <button
               onClick={handleUpdateOffer}
-              className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+              disabled={popupLoding}
+              className={`px-5 py-2 rounded transition text-white ${
+                popupLoding
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Update
+              {popupLoding ? "Updating..." : "Update"}
             </button>
           </div>
         </div>
