@@ -1,194 +1,259 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "../lib/axios/axiosInstance";
 import { Plus, Trash2, Pencil } from "lucide-react";
 
 const AboutUsForm = () => {
+  const [title, setTitle] = useState("");
   const [aboutText, setAboutText] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [tempList, setTempList] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const [aboutList, setAboutList] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setSelectedImage(reader.result);
-      reader.readAsDataURL(file);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    fetchAboutList();
+  }, []);
+
+  const fetchAboutList = async () => {
+    try {
+      const res = await axios.get("/about/getabout");
+      setAboutList(res.data);
+      console.log("Fetched About Us entries:", res.data);
+    } catch (error) {
+      console.error("Fetch error:", error);
     }
   };
 
-  const handleAdd = () => {
-    if (!aboutText.trim() || !selectedImage) return;
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const newItem = {
-      text: aboutText.trim(),
-      image: selectedImage,
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG, JPEG, PNG files are allowed");
+      return;
+    }
+
+    setSelectedImage(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
     };
+    reader.readAsDataURL(file);
+  };
 
-    setTempList([...tempList, newItem]);
+  const resetForm = () => {
+    setTitle("");
     setAboutText("");
     setSelectedImage(null);
+    setPreviewImage(null);
+    setEditingId(null);
   };
 
-  const handlePublish = () => {
-    if (tempList.length === 0) return;
+  const handleAdd = async () => {
+    if (!title.trim()) return alert("Please enter title");
+    if (!aboutText.trim()) return alert("Please enter about text");
 
-    const updatedList = [...aboutList, ...tempList];
-    setAboutList(updatedList);
-    setTempList([]);
+    try {
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("description", aboutText.trim());
+      if (selectedImage) formData.append("image", selectedImage);
+
+      const res = await axios.post("/about/Addabout", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert(res.data.message || "Added successfully");
+      fetchAboutList();
+      resetForm();
+    } catch (error) {
+      console.error("Add error:", error);
+      alert(error.response?.data?.message || "Failed to add About Us entry");
+    }
   };
 
-  const handleDelete = (index) => {
-    const updated = aboutList.filter((_, i) => i !== index);
-    setAboutList(updated);
-  };
-
-  const handleEdit = (index) => {
-    const item = aboutList[index];
-    setAboutText(item.text);
-    setSelectedImage(item.image);
-    setEditingIndex(index);
-  };
-
-  const handleUpdate = () => {
-    if (!aboutText.trim() || !selectedImage || editingIndex === null) return;
-
-    const updatedList = [...aboutList];
-    updatedList[editingIndex] = {
-      text: aboutText.trim(),
-      image: selectedImage,
-    };
-
-    setAboutList(updatedList);
-    setAboutText("");
+  const handleEdit = (item) => {
+    setTitle(item.title || "");
+    setAboutText(item.description || "");
+    setPreviewImage(
+      item.image?.startsWith("http")
+        ? item.image
+        : `http://localhost:4000/${item.image}`
+    );
     setSelectedImage(null);
-    setEditingIndex(null);
+    setEditingId(item._id);
+  };
+
+  const handleUpdate = async () => {
+    if (!title.trim() || !aboutText.trim())
+      return alert("Please fill all fields");
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("description", aboutText.trim());
+      if (selectedImage) formData.append("image", selectedImage);
+
+      const res = await axios.put(`/about/editabout/${editingId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert(res.data.message || "Updated successfully");
+      fetchAboutList();
+      resetForm();
+    } catch (error) {
+      console.error("Update error:", error);
+      alert(error.response?.data?.message || "Failed to update About Us entry");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure to delete this entry?")) return;
+
+    try {
+      const res = await axios.delete(`/about/delabout/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert(res.data.message || "Deleted successfully");
+      fetchAboutList();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert(error.response?.data?.message || "Failed to delete entry");
+    }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-8 mt-16 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-16">
+      <h2 className="text-2xl font-semibold mb-6">About Us Form</h2>
+
       {/* Image Upload */}
-      <div className="mb-6">
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Upload Image</label>
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg, image/jpg, image/png"
           onChange={handleImageChange}
-          className="block w-60 border border-gray-300 rounded px-4 py-3 text-base"
+          className="border border-gray-300 rounded px-4 py-2 w-full"
         />
-        {selectedImage && (
+        {previewImage && (
           <img
-            src={selectedImage}
+            src={previewImage}
             alt="Preview"
-            className="mt-4 w-60 h-auto rounded border border-gray-300"
+            className="mt-4 w-48 h-auto rounded border border-gray-300 object-cover"
           />
         )}
       </div>
 
+      {/* Title Input */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Title</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter title"
+          className="w-full border border-gray-300 rounded px-4 py-2"
+        />
+      </div>
+
       {/* About Text Input */}
-      <label className="block text-base font-semibold mb-2">About Us</label>
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">About Text</label>
         <input
           type="text"
           value={aboutText}
           onChange={(e) => setAboutText(e.target.value)}
           placeholder="Enter about text"
-          className="flex-1 border border-gray-300 rounded px-4 py-3 text-base"
+          className="w-full border border-gray-300 rounded px-4 py-2"
         />
-        {editingIndex === null ? (
-          <button
-            onClick={handleAdd}
-            className="flex items-center justify-center gap-2 px-5 py-3 border border-gray-300 rounded text-base hover:bg-blue-50 transition"
-          >
-            <Plus className="w-5 h-5" /> Add
-          </button>
-        ) : (
-          <button
-            onClick={handleUpdate}
-            className="flex items-center justify-center gap-2 px-5 py-3 border border-yellow-300 bg-yellow-100 text-base rounded hover:bg-yellow-200 transition"
-          >
-            <Pencil className="w-5 h-5" /> Update
-          </button>
-        )}
       </div>
 
-      {/* Publish Button */}
-      <button
-        onClick={handlePublish}
-        disabled={tempList.length === 0}
-        className={`text-base font-semibold px-8 py-3 rounded transition ${
-          tempList.length === 0
-            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-700"
-        }`}
-      >
-        Publish
-      </button>
+      {/* Buttons */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={editingId ? handleUpdate : handleAdd}
+          className={`flex items-center gap-2 px-4 py-2 rounded text-white ${
+            editingId
+              ? "bg-yellow-500 hover:bg-yellow-600"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          <Plus size={16} />
+          {editingId ? "Update" : "Add"}
+        </button>
 
-      {/* Unpublished About Us Items */}
-      {tempList.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-base font-medium text-gray-600 mb-2">
-            Unpublished About Us Content:
-          </h3>
-          <ul className="list-disc list-inside text-gray-500">
-            {tempList.map((item, idx) => (
-              <li key={idx}>{item.text}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        <button
+          onClick={handleAdd}
+          className="flex items-center gap-2 px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Plus size={16} />
+          Publish
+        </button>
+      </div>
 
-      {/* Published About Us Table */}
-      {aboutList.length > 0 ? (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">
-            Published About Us Content
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="py-3 px-4 text-left border-b">Image</th>
-                  <th className="py-3 px-4 text-left border-b">Text</th>
-                  <th className="py-3 px-4 text-left border-b">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {aboutList.map((item, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-3 px-4">
+      {/* About List */}
+      {aboutList.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Published About Us</h3>
+          <table className="w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 border-b">Image</th>
+                <th className="p-3 border-b">Title</th>
+                <th className="p-3 border-b">Text</th>
+                <th className="p-3 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aboutList.map((item) => (
+                <tr key={item._id}>
+                  <td className="p-3 border-b">
+                    {item.image ? (
                       <img
-                        src={item.image}
-                        alt="about"
+                        src={
+                          item.image.startsWith("http")
+                            ? item.image
+                            : `http://localhost:4000/${item.image}`
+                        }
+                        alt="About"
                         className="w-16 h-16 object-cover rounded border"
                       />
-                    </td>
-                    <td className="py-3 px-4 text-base">{item.text}</td>
-                    <td className="py-3 px-4 flex gap-4">
-                      <button
-                        onClick={() => handleEdit(index)}
-                        className="text-blue-600 hover:underline flex items-center gap-1"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(index)}
-                        className="text-red-600 hover:underline flex items-center gap-1"
-                      >
-                        <span>|</span>
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <span className="text-gray-400 italic">No image</span>
+                    )}
+                  </td>
+                  <td className="p-3 border-b">{item.title}</td>
+                  <td className="p-3 border-b">{item.description}</td>
+                  <td className="p-3 border-b flex gap-3">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="text-red-600 hover:underline flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <p className="mt-10 text-gray-500 text-center">
-          No about us content published yet.
-        </p>
       )}
     </div>
   );
