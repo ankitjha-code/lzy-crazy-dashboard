@@ -24,6 +24,7 @@ const Blogs = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBlogList(res.data);
+      console.log("Fetched blogs:", res.data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
     }

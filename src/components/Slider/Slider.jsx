@@ -15,22 +15,25 @@ const Slider = () => {
   const [editingBanner, setEditingBanner] = useState(null);
 
   // Fetch banners for current user
-  useEffect(() => {
-    if (user && isAuthenticated) {
-      fetchBanners();
-    }
-  }, [user]);
-
-  const fetchBanners = async () => {
+  const fetchBanners = React.useCallback(async () => {
     try {
       const res = await axios.post("/banner/get", { userId: user._id });
       if (res.data.success) {
         setBanners(res.data.banners);
       }
     } catch (err) {
-      console.error("Error fetching banners:", err.response?.data || err.message);
+      console.error(
+        "Error fetching banners:",
+        err.response?.data || err.message
+      );
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      fetchBanners();
+    }
+  }, [user, isAuthenticated, fetchBanners]);
 
   // Custom image input handler
   const handleImageChange = (e) => {
@@ -76,7 +79,10 @@ const Slider = () => {
         setLogoPreview(null);
       }
     } catch (err) {
-      console.error("Error creating banner:", err.response?.data || err.message);
+      console.error(
+        "Error creating banner:",
+        err.response?.data || err.message
+      );
     }
   };
 
@@ -103,7 +109,10 @@ const Slider = () => {
     }
 
     try {
-      const res = await axios.put(`/banner/update/${editingBanner._id}`, formData);
+      const res = await axios.put(
+        `/banner/update/${editingBanner._id}`,
+        formData
+      );
       if (res.data.success) {
         fetchBanners();
         setEditModalOpen(false);
@@ -122,7 +131,10 @@ const Slider = () => {
         setBanners((prev) => prev.filter((b) => b._id !== id));
       }
     } catch (err) {
-      console.error("Error deleting banner:", err.response?.data || err.message);
+      console.error(
+        "Error deleting banner:",
+        err.response?.data || err.message
+      );
     }
   };
 
@@ -130,7 +142,7 @@ const Slider = () => {
     <div className="min-h-150 w-full p-5 border border-gray-300 rounded-2xl md:w-[90%] max-w-4xl mx-auto mt-5">
       {/* File Upload Section */}
       <form onSubmit={handleCreateBanner} className="space-y-6">
-         {/* file upload */}
+        {/* file upload */}
         <div className="flex sm:flex-row flex-wrap items-center justify-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <input
@@ -238,11 +250,18 @@ const Slider = () => {
                     className="max-w-[100px] object-cover rounded-lg"
                   />
                 </td>
-                <td className="py-2 px-4 truncate overflow-hidden max-w-[200px]">{item.title}</td>
-                <td className="py-2 px-4 truncate overflow-hidden max-w-[300px]">{item.description}</td>
+                <td className="py-2 px-4 truncate overflow-hidden max-w-[200px]">
+                  {item.title}
+                </td>
+                <td className="py-2 px-4 truncate overflow-hidden max-w-[300px]">
+                  {item.description}
+                </td>
                 <td className="py-2 px-4">
                   <div className="flex flex-row items-center gap-3">
-                    <button onClick={() => openEditModal(item)} className="text-blue-600 hover:underline cursor-pointer">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="text-blue-600 hover:underline cursor-pointer"
+                    >
                       <Edit size={18} />
                     </button>
                     |
@@ -272,7 +291,10 @@ const Slider = () => {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
           <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-lg space-y-5 relative">
             <button
-              onClick={() => {setEditModalOpen(false); resetForm();}}
+              onClick={() => {
+                setEditModalOpen(false);
+                resetForm();
+              }}
               className="absolute top-3 right-3 text-gray-500 hover:text-black"
             >
               <X size={24} />
@@ -294,9 +316,17 @@ const Slider = () => {
               onChange={(e) => setDescription(e.target.value)}
             />
             <div className="flex flex-col gap-4">
-              <input type="file" onChange={handleImageChange} accept="image/*" />
+              <input
+                type="file"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
               {logoPreview && (
-                <img src={logoPreview} alt="Preview" className="h-40 rounded-lg" />
+                <img
+                  src={logoPreview}
+                  alt="Preview"
+                  className="h-40 rounded-lg"
+                />
               )}
             </div>
             <button

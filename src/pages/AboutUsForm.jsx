@@ -20,6 +20,7 @@ const AboutUsForm = () => {
     try {
       const res = await axios.get("/about/getabout");
       setAboutList(res.data);
+      console.log("Fetched About Us entries:", res.data);
     } catch (error) {
       console.error("Fetch error:", error);
     }
