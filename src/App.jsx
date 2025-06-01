@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import store from "./lib/redux/store"
 import { Provider } from "react-redux";
+import Offers from "./pages/Offers";
 
 // Protected route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -125,6 +126,13 @@ const App = () => {
                 <ProtectedRoute>
                   <Client />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="offers"
+              element={            
+                  <Offers/>
+             
               }
             />
             <Route

@@ -11,6 +11,7 @@ import {
   Users,
   Calendar,
   FootprintsIcon as Footer,
+  HandCoins,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -28,6 +29,7 @@ export function Sidebar() {
     { icon: FileText, label: "Blogs", path: "/blogs" },
   
     { icon: Users, label: "Clients", path: "/clients" },
+    {icon: HandCoins, label:"Offers", path:"/offers"},
     { icon: Calendar, label: "Appointment", path: "/appointment" },
     { icon: Footer, label: "Footer", path: "/footer" },
   ];
