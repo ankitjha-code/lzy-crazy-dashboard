@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {useDispatch} from "react-redux"
-import {login} from "../lib/redux/authSlice"
-import axios from "../lib/axios/axiosInstance"
-
+import { useDispatch } from "react-redux";
+import { login } from "../lib/redux/authSlice";
+import axios from "../lib/axios/axiosInstance";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -31,10 +30,12 @@ const Auth = () => {
       dispatch(login({ success: true, data: data.user }));
       navigate("/dashboard"); // or wherever you want to redirect after login
     } catch (error) {
-      console.error("Login failed:", error.response?.data?.message || error.message);
+      console.error(
+        "Login failed:",
+        error.response?.data?.message || error.message
+      );
       alert(error.response?.data?.message || "Login failed");
     }
-
   };
 
   const handleRegisterSubmit = (e) => {
